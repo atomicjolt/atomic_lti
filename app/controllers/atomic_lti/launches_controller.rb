@@ -1,10 +1,9 @@
 module AtomicLti
   class LaunchesController < ::ApplicationController
-    include AtomicLti::OpenIdConnectSupport
     include AtomicLti::LtiLaunchSupport
 
     skip_before_action :verify_authenticity_token
-    before_action :do_lti, except: oidc_actions
+    before_action :do_lti
 
     helper_method :lti_provider, :lti_advantage?, :lti, :lti_launch?
 
