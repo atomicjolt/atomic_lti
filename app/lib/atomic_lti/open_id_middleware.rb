@@ -66,16 +66,62 @@ module AtomicLti
       when *redirect_paths
         handle_redirect(request)
       else
+
+        # TODO wrap in try catch
+        if request.params["id_token"].present? && request.params["state"].present?
+          id_token = request.params["id_token"]
+          state = request.params["state"]
+          url = request.url
+
+          payload = valid_token(state: state, id_token: id_token, url: url) 
+          if payload
+            client_id = payload["aud"]
+            iss = payload["iss"]
+            deployment_id = payload[LtiAdvantage::Definitions::DEPLOYMENT_ID]
+
+            env['atomic.validated.id_token'] = id_token
+            env['atomic.validated.lti_advantage.client_id'] = client_id
+            env['atomic.validated.lti_advantage.iss'] = iss
+            env['atomic.validated.lti_advantage.deployment_id'] = deployment_id
+          end
+
+        end
+
         @app.call(env)
       end
     end
 
     protected
 
+    # TODO check this is legit
+    def valid_token(state:, id_token:, url:)
+
+          # Validate the state by checking the database for the nonce
+          valid_state = AtomicLti::OpenId.validate_open_id_state(state)
+
+          return false if !valid_state
+
+          token = begin
+            AtomicLti::Authorization.validate_token(id_token)
+          rescue JWT::DecodeError => e
+            Rails.logger.error("Unable to decode jwt: #{e}", e)
+          end
+
+          return nil if token.nil?
+ 
+          # Validate that we are at the target_link_uri
+          target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
+          if target_link_uri != url
+            return nil
+          end
+
+          token
+    end
+
     def build_oidc_response(request, state, nonce, redirect_uri)
       platform = AtomicLti::Platform.find_by(iss: request.params["iss"])
       if !platform
-        raise LtiAdvantage::Exceptions::NoLTIPlatform, "No LTI Platform found for iss #{request.params["iss"]}"
+        raise AtomicLti::Exceptions::NoLTIPlatform, "No LTI Platform found for iss #{request.params["iss"]}"
       end
 
       uri = URI.parse(platform.oidc_url)
