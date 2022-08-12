@@ -20,26 +20,15 @@ module AtomicLti
       decoded_token = JWT.decode(token, nil, false)
       iss = decoded_token.dig(0, "iss")
       client_id = decoded_token.dig(0, "aud")
+
+      install = Install.find_by(iss: iss, client_id: client_id)
       cache_key = "#{iss}_jwks"
 
       jwk_loader = ->(options) do
         jwks = Rails.cache.read(cache_key)
         if options[:invalidate] || jwks.blank?
-          deployment_id = decoded_token.dig(0, AtomicLti::Definitions::DEPLOYMENT_ID)
-          # lti_deployment = Deployment.joins(:install).find_by(
-          lti_deployment = Deployment.find_by(
-            deployment_id: deployment_id,
-            iss: iss, 
-            client_id: client_id
-
-            # lti_installs: { iss: iss, client_id: client_id },
-          )
-          if lti_deployment.blank?
-            raise Exceptions::NoLTIDeployment, "No LTI Deployment found with #{deployment_id}"
-          end
-
           jwks = JSON.parse(
-            HTTParty.get(lti_deployment.platform.jwks_url).body,
+            HTTParty.get(install.platform.jwks_url).body,
           ).deep_symbolize_keys
           Rails.cache.write(cache_key, jwks, expires_in: 12.hours)
         end
