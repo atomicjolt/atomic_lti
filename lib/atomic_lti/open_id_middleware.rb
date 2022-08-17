@@ -87,6 +87,9 @@ module AtomicLti
             iss = payload["iss"]
             deployment_id = payload[AtomicLti::Definitions::DEPLOYMENT_ID]
 
+
+            decoded_jwt = JWT.decode(id_token, nil, false)
+            env['atomic.validated.decoded_id_token'] = decoded_jwt
             env['atomic.validated.id_token'] = id_token
             env['atomic.validated.lti_advantage.client_id'] = client_id
             env['atomic.validated.lti_advantage.iss'] = iss
