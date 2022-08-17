@@ -132,6 +132,11 @@ module AtomicLti
       LEARNER_CONTEXT_ROLE,
     ].freeze
 
+    OBSERVER_ROLES = [
+      MENTOR_INSTITUTION_ROLE,
+      #NON_CREDIT_LEARNER,
+    ].freeze
+
     def self.lms_host(payload)
       host = if deep_link_launch?(payload)
                payload.dig(AtomicLti::Definitions::DEEP_LINKING_CLAIM, "deep_link_return_url")

@@ -45,7 +45,7 @@ module AtomicLti
     end
 
     def handle_redirect(request)
-      lti_token = AtomicLti::LtiAdvantage::Authorization.validate_token(
+      lti_token = AtomicLti::Authorization.validate_token(
         request.params["id_token"],
       )
       return not_found("Invalid launch") if lti_token.blank?
@@ -85,7 +85,7 @@ module AtomicLti
           if payload
             client_id = payload["aud"]
             iss = payload["iss"]
-            deployment_id = payload[LtiAdvantage::Definitions::DEPLOYMENT_ID]
+            deployment_id = payload[AtomicLti::Definitions::DEPLOYMENT_ID]
 
             env['atomic.validated.id_token'] = id_token
             env['atomic.validated.lti_advantage.client_id'] = client_id
