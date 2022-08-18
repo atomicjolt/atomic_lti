@@ -2,7 +2,10 @@ module AtomicLti
   module Services
     class Base
 
-      def initialize(iss:, deployment_id:)
+      def initialize(lti_token:)
+        iss = lti_token.dig('iss')
+        deployment_id = lti_token.dig(AtomicLti::Definitions::DEPLOYMENT_ID)
+        @lti_token = lti_token
         @iss = iss
         @deployment_id = deployment_id
       end
