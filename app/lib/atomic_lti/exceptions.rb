@@ -14,6 +14,9 @@ module AtomicLti
 
     class NoLTIDeployment < StandardError
     end
+    
+    class NoLTIInstall < StandardError
+    end
 
     class NoLTIPlatform < StandardError
     end

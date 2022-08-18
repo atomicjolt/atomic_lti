@@ -9,13 +9,20 @@ module AtomicLti
       client_id = decoded_token.dig(0, "aud")
 
       install = Install.find_by(iss: iss, client_id: client_id)
+
+      raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
+
+      platform = install.platform
+
+      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+
       cache_key = "#{iss}_jwks"
 
       jwk_loader = ->(options) do
         jwks = Rails.cache.read(cache_key)
         if options[:invalidate] || jwks.blank?
           jwks = JSON.parse(
-            HTTParty.get(install.platform.jwks_url).body,
+            HTTParty.get(platform.jwks_url).body,
           ).deep_symbolize_keys
           Rails.cache.write(cache_key, jwks, expires_in: 12.hours)
         end
