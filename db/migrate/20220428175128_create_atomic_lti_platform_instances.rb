@@ -1,3 +1,4 @@
+# TODO delete this??
 class CreateAtomicLtiPlatformInstances < ActiveRecord::Migration[6.1]
   def change
     create_table :atomic_lti_platform_instances do |t|

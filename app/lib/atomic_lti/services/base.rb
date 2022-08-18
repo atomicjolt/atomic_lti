@@ -2,12 +2,13 @@ module AtomicLti
   module Services
     class Base
 
-      def initialize(lti_deployment:)
-        @lti_deployment = lti_deployment
+      def initialize(iss:, deployment_id:)
+        @iss = iss
+        @deployment_id = deployment_id
       end
 
       def headers(options = {})
-        @token ||= AtomicLti::Authorization.request_token(@lti_deployment)
+        @token ||= AtomicLti::Authorization.request_token(iss: @iss, deployment_id: @deployment_id)
         {
           "Authorization" => "Bearer #{@token['access_token']}",
         }.merge(options)

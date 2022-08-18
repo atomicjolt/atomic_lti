@@ -23,5 +23,9 @@ module AtomicLti
       json["alg"] = alg
       json
     end
+
+    def self.current_jwk
+      self.last
+    end
   end
 end

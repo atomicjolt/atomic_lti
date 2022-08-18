@@ -39,7 +39,7 @@ module AtomicLti
       end
 
       def self.can_manage_line_items?(lti_token)
-        lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "scope").
+        lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")&.
           include?(AtomicLti::Definitions::AGS_SCOPE_LINE_ITEM)
       end
 

@@ -30,8 +30,6 @@ module AtomicLti
         protocol: "https",
       )
 
-      # byebug
-
       # TODO figure out the redirect URI
       # redirect_uri = "https://learnosityconnector.atomicjolt.xyz/lti_launches"
       redirect_uri = request.params["target_link_uri"] 
@@ -88,7 +86,11 @@ module AtomicLti
             deployment_id = payload[AtomicLti::Definitions::DEPLOYMENT_ID]
 
 
-            decoded_jwt = JWT.decode(id_token, nil, false)
+            decoded_jwt = JWT.decode(id_token, nil, false)[0]
+
+            update_deployment(id_token: decoded_jwt)
+
+
             env['atomic.validated.decoded_id_token'] = decoded_jwt
             env['atomic.validated.id_token'] = id_token
             env['atomic.validated.lti_advantage.client_id'] = client_id
@@ -104,10 +106,32 @@ module AtomicLti
 
     protected
 
+    def update_deployment(id_token:)
+      client_id = id_token["aud"]
+      iss = id_token["iss"]
+      deployment_id = id_token[AtomicLti::Definitions::DEPLOYMENT_ID]
+      platform_guid = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "guid")
+
+      Rails.logger.debug("Associating deployment: #{iss}/#{deployment_id} with client_id: iss: #{iss} / client_id: #{client_id} / platform_guid: #{platform_guid}")
+
+
+      AtomicLti::Deployment
+        .create_with(
+          client_id: client_id,
+          platform_guid: platform_guid
+        ).find_or_create_by!(
+          iss: iss,
+          deployment_id: deployment_id
+        ).update!(
+          client_id: client_id,
+          platform_guid: platform_guid
+        )
+    end
+
     # TODO check this is legit
     def valid_token(state:, id_token:, url:)
 
-          # Validate the state by checking the database for the nonce
+          # Validate the s tate by checking the database for the nonce
           valid_state = AtomicLti::OpenId.validate_open_id_state(state)
 
           return false if !valid_state

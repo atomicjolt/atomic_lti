@@ -30,5 +30,7 @@ module AtomicLti
     class OpenIDRedirectError < StandardError
     end
 
+    class JwtIssueError < StandardError
+    end
   end
 end

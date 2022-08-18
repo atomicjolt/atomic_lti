@@ -2,15 +2,23 @@ module AtomicLti
   module Services
     class NamesAndRoles < AtomicLti::Services::Base
 
-      def initialize(lti_deployment:, lti_token:)
-        super(lti_deployment: lti_deployment)
+      def initialize(lti_token:)
+        iss = lti_token.dig('iss')
+        deployment_id = lti_token.dig(AtomicLti::Definitions::DEPLOYMENT_ID)
         @lti_token = lti_token
+        super(iss: iss, deployment_id: deployment_id)
       end
 
       def endpoint
         url = @lti_token.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "context_memberships_url")
         raise AtomicLti::Exceptions::NamesAndRolesError, "Unable to access names and roles" unless url.present?
 
+        url
+      end
+
+      def url_for(query = nil)
+        url = endpoint.dup
+        url << "?#{query}" if query.present?
         url
       end
 

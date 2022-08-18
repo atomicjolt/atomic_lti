@@ -11,4 +11,8 @@ module AtomicLti
   mattr_accessor :context_scope_to_iss
   @@context_scope_to_iss = true
 
+  def self.jwt_issue_iss
+     "atomicjoltapps.com"
+  end
+
 end
