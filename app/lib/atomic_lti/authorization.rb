@@ -1,18 +1,5 @@
 module AtomicLti
   class Authorization
-    def self.application_instance_from_token(token)
-      return unless token
-
-      decoded_token = JWT.decode(token, nil, false)
-      payload = decoded_token[PAYLOAD]
-      client_id = payload["aud"]
-      iss = payload["iss"]
-      deployment_id = payload[AtomicLti::Definitions::DEPLOYMENT_ID]
-      if client_id && deployment_id && iss
-        ApplicationInstance.by_client_and_deployment(client_id, deployment_id, iss)
-      end
-    end
-
     # Validates a token provided by an LTI consumer
     def self.validate_token(token)
       # Get the iss value from the original request during the oidc call.
