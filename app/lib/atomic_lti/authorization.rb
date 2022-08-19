@@ -85,12 +85,11 @@ module AtomicLti
       # Subtract a few seconds so we don't use an expired token
       expires_in = authorization["expires_in"].to_i - 10
 
-      # TODO enable
-      # Rails.cache.write(
-      #   cache_key,
-      #   authorization,
-      #   expires_in: expires_in,
-      # )
+      Rails.cache.write(
+        cache_key,
+        authorization,
+        expires_in: expires_in,
+      )
 
       authorization
     end
