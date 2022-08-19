@@ -69,11 +69,12 @@ module AtomicLti
             if payload
               decoded_jwt = JWT.decode(id_token, nil, false)[0]
 
-              update_deployment(id_token: decoded_jwt)
               update_platform_instance(id_token: decoded_jwt)
+              update_deployment(id_token: decoded_jwt)
+              update_lti_context(id_token: decoded_jwt)
 
               errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
-              if errors.present?
+              if errors.present? && !errors['errors'].empty?
                 Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
               end
 
@@ -116,6 +117,30 @@ module AtomicLti
     end
 
     def update_lti_context(id_token:)
+      if id_token[AtomicLti::Definitions::CONTEXT_CLAIM].present? && id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['id'].present?
+        iss = id_token['iss']
+        deployment_id = id_token[AtomicLti::Definitions::DEPLOYMENT_ID]
+        context_id = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['id']
+        label = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['label']
+        title = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['title']
+        types = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['type']
+
+        AtomicLti::Context.create_with(
+          label: label,
+          title: title,
+          types: types,
+        ).find_or_create_by!(
+          iss: iss,
+          deployment_id: deployment_id,
+          context_id: context_id
+        ).update!(
+          label: label,
+          title: title,
+          types: types,
+        )
+      else
+        Rails.logger.info("No context claim recieved: #{id_token}")
+      end
     end
 
     def update_deployment(id_token:)
