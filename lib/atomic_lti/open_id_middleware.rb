@@ -64,43 +64,36 @@ module AtomicLti
     end
 
     def call(env)
-      request = Rack::Request.new(env)
+      begin
+        
+        request = Rack::Request.new(env)
 
-      case request.path
-      when *init_paths
-        handle_init(request)
-      when *redirect_paths
-        handle_redirect(request)
-      else
+        case request.path
+        when *init_paths
+          handle_init(request)
+        when *redirect_paths
+          handle_redirect(request)
+        else
+          if request.params["id_token"].present? && request.params["state"].present?
+            id_token = request.params["id_token"]
+            state = request.params["state"]
+            url = request.url
 
-        # TODO wrap in try catch
-        if request.params["id_token"].present? && request.params["state"].present?
-          id_token = request.params["id_token"]
-          state = request.params["state"]
-          url = request.url
+            payload = valid_token(state: state, id_token: id_token, url: url)
+            if payload
+              decoded_jwt = JWT.decode(id_token, nil, false)[0]
 
-          payload = valid_token(state: state, id_token: id_token, url: url) 
-          if payload
-            client_id = payload["aud"]
-            iss = payload["iss"]
-            deployment_id = payload[AtomicLti::Definitions::DEPLOYMENT_ID]
+              update_deployment(id_token: decoded_jwt)
 
-
-            decoded_jwt = JWT.decode(id_token, nil, false)[0]
-
-            update_deployment(id_token: decoded_jwt)
-
-
-            env['atomic.validated.decoded_id_token'] = decoded_jwt
-            env['atomic.validated.id_token'] = id_token
-            env['atomic.validated.lti_advantage.client_id'] = client_id
-            env['atomic.validated.lti_advantage.iss'] = iss
-            env['atomic.validated.lti_advantage.deployment_id'] = deployment_id
+              env['atomic.validated.decoded_id_token'] = decoded_jwt
+              env['atomic.validated.id_token'] = id_token
+            end
           end
-
+          @app.call(env)
         end
-
-        @app.call(env)
+      rescue StandardError => e
+          Rails.logger.error("Error in OpenIdMiddleware: #{e}")
+          @app.call(env)
       end
     end
 
