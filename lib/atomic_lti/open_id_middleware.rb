@@ -70,6 +70,12 @@ module AtomicLti
               decoded_jwt = JWT.decode(id_token, nil, false)[0]
 
               update_deployment(id_token: decoded_jwt)
+              update_platform_instance(id_token: decoded_jwt)
+
+              errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
+              if errors.present?
+                Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
+              end
 
               env['atomic.validated.decoded_id_token'] = decoded_jwt
               env['atomic.validated.id_token'] = id_token
@@ -79,11 +85,38 @@ module AtomicLti
         end
       rescue StandardError => e
           Rails.logger.error("Error in OpenIdMiddleware: #{e}")
+          raise e if Rails.env == "development"
           @app.call(env)
       end
     end
 
     protected
+
+    def update_platform_instance(id_token:)
+      if id_token[AtomicLti::Definitions::TOOL_PLATFORM_CLAIM].present? && id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'guid').present?
+        name = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'name')
+        version = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'version')
+        product_family_code = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'product_family_code')
+
+        AtomicLti::PlatformInstance.create_with(
+          name: name,
+          version: version,
+          product_family_code: product_family_code,
+        ).find_or_create_by!(
+          iss: id_token['iss'],
+          guid: id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'guid')
+        ).update!(
+          name: name,
+          version: version,
+          product_family_code: product_family_code,
+        )
+      else
+        Rails.logger.info("No platform guid recieved: #{id_token}")
+      end
+    end
+
+    def update_lti_context(id_token:)
+    end
 
     def update_deployment(id_token:)
       client_id = id_token["aud"]
