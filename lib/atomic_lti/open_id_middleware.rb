@@ -30,8 +30,6 @@ module AtomicLti
         protocol: "https",
       )
 
-      # TODO figure out the redirect URI
-      # redirect_uri = "https://learnosityconnector.atomicjolt.xyz/lti_launches"
       redirect_uri = request.params["target_link_uri"] 
       
       state = AtomicLti::OpenId.state
