@@ -11,6 +11,10 @@ module AtomicLti
   mattr_accessor :context_scope_to_iss
   @@context_scope_to_iss = true
 
+  mattr_accessor :oidc_init_path
+  mattr_accessor :oidc_redirect_path
+
+
   def self.jwt_issue_iss
      "atomicjoltapps.com"
   end
