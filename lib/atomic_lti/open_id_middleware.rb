@@ -54,7 +54,7 @@ module AtomicLti
       redirect_uri  = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = CGI.parse(redirect_uri.query)
 
-      matches_redirect_path = request.path == uri.path
+      matches_redirect_path = request.path == redirect_uri.path
 
       return false if !matches_redirect_path
 
