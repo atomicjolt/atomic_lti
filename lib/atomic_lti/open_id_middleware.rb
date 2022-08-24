@@ -6,20 +6,20 @@ module AtomicLti
 
     def init_paths
       [
-        AtomicLti.oidc_init_path || "/lti_launches/init"
+        AtomicLti.oidc_init_path
       ]
     end
 
     def redirect_paths
       [
-        AtomicLti::Engine.routes.url_for(only_path: true, controller: 'atomic_lti/launches', action: 'redirect'),
+        AtomicLti.oidc_redirect_path
       ]
     end
 
     def handle_init(request)
       nonce = SecureRandom.hex(64)
 
-      redirect_uri = request.params["target_link_uri"] 
+      redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
 
       state = AtomicLti::OpenId.state
       url = build_oidc_response(request, state, nonce, redirect_uri)
@@ -29,36 +29,48 @@ module AtomicLti
       [302, headers, ["Found"]]
     end
 
-    # def handle_redirect(request)
-    #   lti_token = AtomicLti::Authorization.validate_token(
-    #     request.params["id_token"],
-    #   )
-    #   return not_found("Invalid launch") if lti_token.blank?
+    def handle_redirect(request)
+      lti_token = AtomicLti::Authorization.validate_token(
+        request.params["id_token"],
+      )
+      return not_found("Invalid launch") if lti_token.blank?
 
-    #   target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-    #   redirect_params = {
-    #     state: request.params["state"],
-    #     id_token: request.params["id_token"],
-    #   }
-    #   html = ApplicationController.renderer.render(
-    #     :html,
-    #     layout: false,
-    #     template: "atomic_lti/shared/redirect",
-    #     assigns: { launch_params: redirect_params, launch_url: target_link_uri },
-    #   )
+      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
+      redirect_params = {
+        state: request.params["state"],
+        id_token: request.params["id_token"],
+      }
+      html = ApplicationController.renderer.render(
+        :html,
+        layout: false,
+        template: "atomic_lti/shared/redirect",
+        assigns: { launch_params: redirect_params, launch_url: target_link_uri },
+      )
 
-    #   [200, { "Content-Type" => "text/html" }, [html]]
-    # end
+      [200, { "Content-Type" => "text/html" }, [html]]
+    end
+
+    def matches_redirect?(request)
+      redirect_uri  = URI.parse(AtomicLti.oidc_redirect_path)
+      redirect_path_params = CGI.parse(redirect_uri.query)
+
+      matches_redirect_path = request.path == uri.path
+
+      return false if !matches_redirect_path
+
+      params_match = redirect_path_params.all? { |key, values| request.params[key] == values.first }
+
+      matches_redirect_path && params_match
+    end
 
     def call(env)
       begin
         request = Rack::Request.new(env)
 
-        case request.path
-        when *init_paths
+        if init_paths.include?(request.path)
           handle_init(request)
-        when *redirect_paths
-          # handle_redirect(request)
+        elsif matches_redirect?(request)
+          handle_redirect(request)
         else
           if request.params["id_token"].present? && request.params["state"].present?
             id_token = request.params["id_token"]
