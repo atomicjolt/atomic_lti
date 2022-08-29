@@ -3,7 +3,7 @@ class CreateAtomicLtiDeployments < ActiveRecord::Migration[6.1]
     create_table :atomic_lti_deployments do |t|
       t.string :deployment_id, null: false
       t.string :client_id, null: false
-      t.string :platform_guid # TODO Not required
+      t.string :platform_guid
       t.string :iss, null: false
       t.timestamps
     end

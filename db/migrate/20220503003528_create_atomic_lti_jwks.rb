@@ -3,7 +3,7 @@ class CreateAtomicLtiJwks < ActiveRecord::Migration[6.1]
     create_table :atomic_lti_jwks do |t|
       t.string :kid
       t.string :pem
-      t.string :domain # TODO get rid of
+      t.string :domain
       t.timestamps
     end
     add_index :atomic_lti_jwks, :kid

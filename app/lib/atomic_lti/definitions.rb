@@ -113,7 +113,7 @@ module AtomicLti
     ## Non‑core context roles
     MANAGER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Manager".freeze
     MEMBER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Member".freeze
-    OFFICER_CONTEXT_ROLEee = "http://purl.imsglobal.org/vocab/lis/v2/membership#Officer".freeze
+    OFFICER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Officer".freeze
 
     ADMINISTRATOR_ROLES = [
       ADMINISTRATOR_SYSTEM_ROLE,

@@ -1,7 +1,6 @@
 module AtomicLti
   class DynamicRegistrationsController < ApplicationController
     def index
-      byebug
       # The URL where the Tool will read all the information about the Platform (as per OIDC Reg specification).
       config_url = params["openid_configuration"]
 
