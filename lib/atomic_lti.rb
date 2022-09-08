@@ -13,6 +13,7 @@ module AtomicLti
 
   mattr_accessor :oidc_init_path
   mattr_accessor :oidc_redirect_path
+  mattr_accessor :target_link_path_prefixes
 
 
   def self.jwt_issue_iss

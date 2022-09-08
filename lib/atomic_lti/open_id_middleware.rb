@@ -67,6 +67,12 @@ module AtomicLti
       matches_redirect_path && params_match
     end
 
+    def matches_target_link?(request)
+      AtomicLti.target_link_path_prefixes.any? do |prefix|
+        request.path.starts_with? prefix
+      end
+    end
+
     def call(env)
       begin
         request = Rack::Request.new(env)
@@ -76,7 +82,7 @@ module AtomicLti
         elsif matches_redirect?(request)
           handle_redirect(request)
         else
-          if request.params["id_token"].present? && request.params["state"].present?
+          if matches_target_link?(request) && request.params["id_token"].present? && request.params["state"].present?
             id_token = request.params["id_token"]
             state = request.params["state"]
             url = request.url
@@ -196,7 +202,7 @@ module AtomicLti
           end
 
           return nil if token.nil?
- 
+
           # Validate that we are at the target_link_uri
           target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
           if target_link_uri != url
