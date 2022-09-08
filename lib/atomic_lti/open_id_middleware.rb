@@ -79,7 +79,7 @@ module AtomicLti
 
             payload = valid_token(state: state, id_token: id_token, url: url)
             if payload
-              decoded_jwt = JWT.decode(id_token, nil, false)[0]
+              decoded_jwt = payload
 
               update_install(id_token: decoded_jwt)
               update_platform_instance(id_token: decoded_jwt)
@@ -201,18 +201,21 @@ module AtomicLti
 
           return false if !valid_state
 
-          token = begin
-            AtomicLti::Authorization.validate_token(id_token)
+          token = false
+
+          begin
+            token = AtomicLti::Authorization.validate_token(id_token)
           rescue JWT::DecodeError => e
             Rails.logger.error("Unable to decode jwt: #{e}", e)
+            return false
           end
 
-          return nil if token.nil?
+          return false if token.nil?
  
           # Validate that we are at the target_link_uri
           target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
           if target_link_uri != url
-            return nil
+            return false
           end
 
           token
