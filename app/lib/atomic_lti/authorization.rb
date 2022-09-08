@@ -6,8 +6,13 @@ module AtomicLti
       # Use that value to figure out which jwk we should use.
       decoded_token = JWT.decode(token, nil, false)
       iss = decoded_token.dig(0, "iss")
+      client_id = decoded_token.dig(0, "aud")
 
-      platform = Platform.find_by(iss: iss)
+      install = Install.find_by(iss: iss, client_id: client_id)
+
+      raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
+
+      platform = install.platform
 
       raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
 

@@ -81,7 +81,6 @@ module AtomicLti
             if payload
               decoded_jwt = JWT.decode(id_token, nil, false)[0]
 
-              update_install(id_token: decoded_jwt)
               update_platform_instance(id_token: decoded_jwt)
               update_deployment(id_token: decoded_jwt)
               update_lti_context(id_token: decoded_jwt)
@@ -126,21 +125,6 @@ module AtomicLti
         )
       else
         Rails.logger.info("No platform guid recieved: #{id_token}")
-      end
-    end
-
-    def update_install(id_token:)
-      client_id = id_token["aud"]
-      iss = id_token["iss"]
-
-      if client_id.present? && iss.present?
-
-        AtomicLti::Install.find_or_create_by!(
-          iss: iss,
-          client_id: client_id
-        )
-      else
-        Rails.logger.info("No client_id recieved: #{id_token}")
       end
     end
 

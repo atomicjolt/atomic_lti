@@ -10,6 +10,7 @@ module AtomicLti
       raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
 
       install = deployment.install
+
       raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
 
       payload = {
