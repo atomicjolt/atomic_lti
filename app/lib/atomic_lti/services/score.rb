@@ -5,7 +5,7 @@ module AtomicLti
 
       attr_accessor :id
 
-      def initialize(lti_token:, id:)
+      def initialize(lti_token:, id: nil)
         super(lti_token: lti_token)
         @id = id
       end
