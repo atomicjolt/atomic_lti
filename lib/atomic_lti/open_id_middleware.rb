@@ -51,8 +51,12 @@ module AtomicLti
     end
 
     def matches_redirect?(request)
-      redirect_uri  = URI.parse(AtomicLti.oidc_redirect_path)
-      redirect_path_params = CGI.parse(redirect_uri.query)
+      redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
+      redirect_path_params = if redirect_uri.query
+                               CGI.parse(redirect_uri.query)
+                             else
+                               []
+                             end
 
       matches_redirect_path = request.path == redirect_uri.path
 
@@ -61,6 +65,12 @@ module AtomicLti
       params_match = redirect_path_params.all? { |key, values| request.params[key] == values.first }
 
       matches_redirect_path && params_match
+    end
+
+    def matches_target_link?(request)
+      AtomicLti.target_link_path_prefixes.any? do |prefix|
+        request.path.starts_with? prefix
+      end
     end
 
     def call(env)
@@ -72,7 +82,7 @@ module AtomicLti
         elsif matches_redirect?(request)
           handle_redirect(request)
         else
-          if request.params["id_token"].present? && request.params["state"].present?
+          if matches_target_link?(request) && request.params["id_token"].present? && request.params["state"].present?
             id_token = request.params["id_token"]
             state = request.params["state"]
             url = request.url
