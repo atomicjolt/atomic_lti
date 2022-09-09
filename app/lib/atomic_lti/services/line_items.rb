@@ -51,9 +51,9 @@ module AtomicLti
 
       # List line items
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.index
-      def list(query = {}, lti_token:)
+      def list(query = {})
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitemcontainer+json" }
-        HTTParty.get(endpoint(lti_token), headers: headers(accept), query: query)
+        HTTParty.get(endpoint(@lti_token), headers: headers(accept), query: query)
       end
 
       # Get a specific line item
@@ -66,9 +66,9 @@ module AtomicLti
       # Create a line item
       # https://www.imsglobal.org/spec/lti-ags/v2p0/#creating-a-new-line-item
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.create
-      def create(attrs = nil, lti_token:)
+      def create(attrs = nil)
         content_type = { "Content-Type" => "application/vnd.ims.lis.v2.lineitem+json" }
-        HTTParty.post(endpoint(lti_token), body: JSON.dump(attrs), headers: headers(content_type))
+        HTTParty.post(endpoint(@lti_token), body: JSON.dump(attrs), headers: headers(content_type))
       end
 
       # Update a line item
