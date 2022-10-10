@@ -86,7 +86,7 @@ module AtomicLti
         update_install(id_token: decoded_jwt)
         update_platform_instance(id_token: decoded_jwt)
         update_deployment(id_token: decoded_jwt)
-        update_lti_context(id_token: decoded_jwt)
+        # update_lti_context(id_token: decoded_jwt)
 
         errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
         if errors.present? && !errors['errors'].empty?
