@@ -22,8 +22,7 @@ module AtomicLti
       AtomicLti.oidc_init_path = '/oidc/init'
       AtomicLti.oidc_redirect_path = '/oidc/redirect'
       AtomicLti.target_link_path_prefixes = ['/lti_launches']
-
-      Rails.application.secrets.auth0_client_secret = "foo" # TODO
+      AtomicLti.jwt_secret = "bar"
     end
 
     it "Passes non lti launch request" do
