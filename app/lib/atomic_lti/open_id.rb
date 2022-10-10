@@ -8,6 +8,9 @@ module AtomicLti
       else
         false
       end
+    rescue StandardError => e
+      Rails.logger.info("Error decoding token: #{e} - #{e.backtrace}")
+      false
     end
 
     def self.state
