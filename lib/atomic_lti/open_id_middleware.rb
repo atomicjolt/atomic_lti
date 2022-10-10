@@ -109,10 +109,8 @@ module AtomicLti
        handle_init(request)
      elsif matches_redirect?(request)
        handle_redirect(request)
-    
-       # TODO give back 401 if no state is present, or if it can't be decoded
-     elsif matches_target_link?(request) && request.params["id_token"].present? && request.params["state"].present?
-      handle_lti_launch(env, request)
+     elsif matches_target_link?(request)
+       handle_lti_launch(env, request)
      else
        @app.call(env)
      end
