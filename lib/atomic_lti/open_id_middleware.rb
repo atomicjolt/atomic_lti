@@ -97,8 +97,8 @@ module AtomicLti
 
         @app.call(env)
       else
-        Rails.logger.info("Invalid lti launch: id_token: #{payload}")
-        [401, {}, "Invalid Lti Launch"]
+        Rails.logger.info("Invalid lti launch: id_token: #{payload} - id_token: #{id_token} - state: #{state} - url: #{url}")
+        [401, {}, ["Invalid Lti Launch"]]
       end
     end
 
