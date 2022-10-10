@@ -51,6 +51,7 @@ module AtomicLti
     end
 
     def matches_redirect?(request)
+      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank? 
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
