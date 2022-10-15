@@ -51,6 +51,7 @@ module AtomicLti
     end
 
     def matches_redirect?(request)
+      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank? 
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
@@ -73,45 +74,46 @@ module AtomicLti
       end
     end
 
-    def call(env)
-      begin
-        request = Rack::Request.new(env)
+    def handle_lti_launch(env, request)
+      id_token = request.params["id_token"]
+      state = request.params["state"]
+      url = request.url
 
-        if init_paths.include?(request.path)
-          handle_init(request)
-        elsif matches_redirect?(request)
-          handle_redirect(request)
-        else
-          if matches_target_link?(request) && request.params["id_token"].present? && request.params["state"].present?
-            id_token = request.params["id_token"]
-            state = request.params["state"]
-            url = request.url
+      payload = valid_token(state: state, id_token: id_token, url: url)
+      if payload
+        decoded_jwt = payload
 
-            payload = valid_token(state: state, id_token: id_token, url: url)
-            if payload
-              decoded_jwt = payload
+        update_install(id_token: decoded_jwt)
+        update_platform_instance(id_token: decoded_jwt)
+        update_deployment(id_token: decoded_jwt)
+        update_lti_context(id_token: decoded_jwt)
 
-              update_install(id_token: decoded_jwt)
-              update_platform_instance(id_token: decoded_jwt)
-              update_deployment(id_token: decoded_jwt)
-              update_lti_context(id_token: decoded_jwt)
-
-              errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
-              if errors.present? && !errors['errors'].empty?
-                Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
-              end
-
-              env['atomic.validated.decoded_id_token'] = decoded_jwt
-              env['atomic.validated.id_token'] = id_token
-            end
-          end
-          @app.call(env)
+        errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
+        if errors.present? && !errors['errors'].empty?
+          Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
         end
-      rescue StandardError => e
-          Rails.logger.error("Error in OpenIdMiddleware: #{e}")
-          raise e if Rails.env == "development"
-          @app.call(env)
+
+        env['atomic.validated.decoded_id_token'] = decoded_jwt
+        env['atomic.validated.id_token'] = id_token
+
+        @app.call(env)
+      else
+        Rails.logger.info("Invalid lti launch: id_token: #{payload} - id_token: #{id_token} - state: #{state} - url: #{url}")
+        [401, {}, ["Invalid Lti Launch"]]
       end
+    end
+
+    def call(env)
+     request = Rack::Request.new(env)
+     if init_paths.include?(request.path)
+       handle_init(request)
+     elsif matches_redirect?(request)
+       handle_redirect(request)
+     elsif matches_target_link?(request)
+       handle_lti_launch(env, request)
+     else
+       @app.call(env)
+     end
     end
 
     protected
@@ -203,7 +205,6 @@ module AtomicLti
         )
     end
 
-    # TODO check this is legit
     def valid_token(state:, id_token:, url:)
 
           # Validate the s tate by checking the database for the nonce
@@ -216,7 +217,7 @@ module AtomicLti
           begin
             token = AtomicLti::Authorization.validate_token(id_token)
           rescue JWT::DecodeError => e
-            Rails.logger.error("Unable to decode jwt: #{e}", e)
+            Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
             return false
           end
 

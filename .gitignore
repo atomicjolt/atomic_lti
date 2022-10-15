@@ -10,3 +10,4 @@
 /test/dummy/tmp/
 /vendor
 .byebug_history
+test/dummy/db/*
