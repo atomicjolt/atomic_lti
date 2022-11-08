@@ -10,7 +10,7 @@ module AtomicLti
       end
 
       # Helper method to generate a default set of attributes
-      def generate(
+      def self.generate(
         label:,
         max_score:,
         start_date_time: nil,
@@ -36,6 +36,10 @@ module AtomicLti
           }
         end
         attrs
+      end
+
+      def generate(attrs)
+        self.class.generate(**attrs)
       end
 
       def self.can_manage_line_items?(lti_token)
