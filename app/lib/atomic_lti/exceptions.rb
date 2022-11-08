@@ -32,5 +32,8 @@ module AtomicLti
 
     class JwtIssueError < StandardError
     end
+    
+    class LineItemMissing < LineItemError
+    end
   end
 end
