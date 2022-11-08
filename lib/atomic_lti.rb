@@ -17,10 +17,6 @@ module AtomicLti
   mattr_accessor :jwt_secret
 
 
-  def self.jwt_issue_iss
-     "atomicjoltapps.com"
-  end
-
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
   end
