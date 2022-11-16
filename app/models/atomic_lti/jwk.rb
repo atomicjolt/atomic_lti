@@ -24,6 +24,11 @@ module AtomicLti
       json
     end
 
+    def to_pem
+      pkey = OpenSSL::PKey::RSA.new(pem)
+      pkey.public_key.to_pem
+    end
+
     def self.current_jwk
       self.last
     end
