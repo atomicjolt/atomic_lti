@@ -51,7 +51,7 @@ module AtomicLti
     end
 
     def matches_redirect?(request)
-      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank? 
+      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank?
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
@@ -109,7 +109,7 @@ module AtomicLti
        handle_init(request)
      elsif matches_redirect?(request)
        handle_redirect(request)
-     elsif matches_target_link?(request)
+     elsif matches_target_link?(request) && request.params["id_token"].present?
        handle_lti_launch(env, request)
      else
        @app.call(env)
@@ -222,7 +222,7 @@ module AtomicLti
           end
 
           return false if token.nil?
- 
+
           # Validate that we are at the target_link_uri
           target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
           if target_link_uri != url
