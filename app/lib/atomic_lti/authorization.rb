@@ -130,7 +130,6 @@ module AtomicLti
         body: body,
         headers: headers
       )
-      Rails.logger.debug("Received result from platform: #{platform.iss}, code: #{result.code}, body: #{result.body}")
 
       if !result.success?
         Rails.logger.warn(result.body)
