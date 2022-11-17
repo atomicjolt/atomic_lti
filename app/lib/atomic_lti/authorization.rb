@@ -1,5 +1,7 @@
 module AtomicLti
   class Authorization
+
+    AUTHORIZATION_TRIES = 3
     # Validates a token provided by an LTI consumer
     def self.validate_token(token)
       # Get the iss value from the original request during the oidc call.
@@ -72,20 +74,33 @@ module AtomicLti
       raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
 
       cache_key = "#{deployment.cache_key_with_version}/services_authorization"
-      authorization = Rails.cache.read(cache_key)
-      return authorization if authorization.present?
+      tries = 1
 
-      authorization = request_token_uncached(iss: iss, deployment_id: deployment_id)
+      begin
+        authorization = Rails.cache.read(cache_key)
+        return authorization if authorization.present?
 
-      # Subtract a few seconds so we don't use an expired token
-      expires_in = authorization["expires_in"].to_i - 10
+        authorization = request_token_uncached(iss: iss, deployment_id: deployment_id)
 
-      Rails.cache.write(
-        cache_key,
-        authorization,
-        expires_in: expires_in,
-      )
+        # Subtract a few seconds so we don't use an expired token
+        expires_in = authorization["expires_in"].to_i - 10
 
+        Rails.cache.write(
+          cache_key,
+          authorization,
+          expires_in: expires_in,
+        )
+
+      rescue AtomicLti::Exceptions::RateLimitError => e
+        if tries < AUTHORIZATION_TRIES
+          Rails.logger.warn("LTI Request token error: Rate limit exception, sleeping")
+          sleep rand(1.0..2.0)
+          tries += 1
+          retry
+        else
+          raise e
+        end
+      end
       authorization
     end
 
@@ -110,17 +125,21 @@ module AtomicLti
 
       raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
 
-      Rails.logger.debug("Requesting jwt token from platform: #{platform.iss}, token_url: #{platform.token_url}")
-
       result = HTTParty.post(
         platform.token_url,
         body: body,
         headers: headers
       )
-
       Rails.logger.debug("Received result from platform: #{platform.iss}, code: #{result.code}, body: #{result.body}")
 
-      raise AtomicLti::Exceptions::JwtIssueError.new(result.body) if !result.success?
+      if !result.success?
+        Rails.logger.warn(result.body)
+
+        # Canvas rate limit error
+        raise AtomicLti::Exceptions::RateLimitError if /rate limit/i.match?(result.body)
+
+        raise AtomicLti::Exceptions::JwtIssueError.new(result.body)
+      end
 
       JSON.parse(result.body)
     end

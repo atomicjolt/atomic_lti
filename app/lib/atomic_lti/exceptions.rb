@@ -14,7 +14,7 @@ module AtomicLti
 
     class NoLTIDeployment < StandardError
     end
-    
+
     class NoLTIInstall < StandardError
     end
 
@@ -32,8 +32,11 @@ module AtomicLti
 
     class JwtIssueError < StandardError
     end
-    
+
     class LineItemMissing < LineItemError
+    end
+
+    class RateLimitError < StandardError
     end
   end
 end
