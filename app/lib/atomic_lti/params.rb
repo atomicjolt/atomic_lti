@@ -108,7 +108,7 @@ module AtomicLti
     # These values must be added to the developer key under "Custom Fields"
     # for example: canvas_course_id=$Canvas.course.id
     def custom_data
-      token[AtomicLti::Definitions::CUSTOM_CLAIM]&.reject { |s| s.start_with?("$Canvas") } || {}
+      token[AtomicLti::Definitions::CUSTOM_CLAIM]&.reject { |_, s| s.to_s.start_with?("$Canvas") } || {}
     end
 
     def canvas_course_id
