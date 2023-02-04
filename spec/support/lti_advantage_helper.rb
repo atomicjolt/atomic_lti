@@ -88,17 +88,19 @@ def setup_canvas_lti_advantage(
       deployment_id: @deployment_id,
   ).deep_stringify_keys
 
-  @decoded_id_token = yield(@decoded_id_token) if block_given?
+  if block_given?
+    result = yield(@decoded_id_token, canvas_jwk)
+    @decoded_id_token = result[:decoded_id_token] if result[:decoded_id_token]
+    @id_token = result[:id_token]
+  end
 
-  @id_token = JWT.encode(
+  @id_token ||= JWT.encode(
     @decoded_id_token,
     canvas_jwk.private_key,
     canvas_jwk.alg,
     kid: canvas_jwk.kid,
     typ: "JWT",
   )
-
-  @lti_token = AtomicLti::Authorization.validate_token(@id_token)
 
   nonce = SecureRandom.hex(64)
   AtomicLti::OpenIdState.create!(nonce: nonce)

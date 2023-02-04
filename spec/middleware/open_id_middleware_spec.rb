@@ -49,15 +49,47 @@ module AtomicLti
         expect(response[0].include?(" <form action=\"http://atomicjolt-registrar.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
       end
 
+      it "returns an error when the KID is missing from the JWT header" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token, canvas_jwk|
+          id_token = JWT.encode(
+            decoded_id_token,
+            canvas_jwk.private_key,
+            canvas_jwk.alg,
+            kid: "",
+            typ: "JWT",
+          )
+          {
+            id_token: id_token
+          }
+        end
+        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
+      end
+
+      it "returns an error when an incorrect KID is passed in the JWT header" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token, canvas_jwk|
+          id_token = JWT.encode(
+            decoded_id_token,
+            canvas_jwk.private_key,
+            canvas_jwk.alg,
+            kid: "2345",
+            typ: "JWT",
+          )
+          {
+            id_token: id_token
+          }
+        end
+        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
+      end
+
       it "returns an error when the LTI version is invalid" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
-          decoded_id_token
+          { decoded_id_token: decoded_id_token }
         end
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
-        status, _headers, response = subject.call(req_env)
-        expect(status).to eq(500)
-        expect(response[0]).to eq("Invalid LTI Version")
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
       end
     end
 

@@ -1,3 +1,5 @@
+require "jwt"
+
 module AtomicLti
   class Authorization
 

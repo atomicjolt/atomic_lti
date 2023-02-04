@@ -53,8 +53,6 @@ module AtomicLti
       )
 
       [200, { "Content-Type" => "text/html" }, [html]]
-    rescue => e
-      error!(e.message)
     end
 
     def matches_redirect?(request)
