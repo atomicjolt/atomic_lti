@@ -18,7 +18,7 @@ module AtomicLti
     subject { OpenIdMiddleware.new(app) }
 
 
-    before do 
+    before do
       AtomicLti.oidc_init_path = '/oidc/init'
       AtomicLti.oidc_redirect_path = '/oidc/redirect'
       AtomicLti.target_link_path_prefixes = ['/lti_launches']
@@ -30,9 +30,9 @@ module AtomicLti
       expect(status).to eq(200)
     end
 
-    describe "init" do 
+    describe "init" do
       it "Handles init" do
-        
+
         setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
         status, _headers, _response = subject.call(req_env)
@@ -41,17 +41,28 @@ module AtomicLti
     end
 
     describe "redirect" do
-      it "handles redirect" do 
+      it "handles redirect" do
         mocks = setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
         expect(response[0].include?(" <form action=\"http://atomicjolt-registrar.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
       end
+
+      it "returns an error when the LTI version is invalid" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
+          decoded_id_token
+        end
+        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        status, _headers, response = subject.call(req_env)
+        expect(status).to eq(500)
+        expect(response[0]).to eq("Invalid LTI Version")
+      end
     end
 
     describe "lti_launches" do
-      it "launches" do 
+      it "launches" do
         mocks = setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for("http://atomicjolt-registrar.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
@@ -62,10 +73,10 @@ module AtomicLti
         expect(returned_env['atomic.validated.decoded_id_token']).to eq(mocks[:decoded_id_token])
       end
 
-      it "doesnt launch with invalid token" do
+      it "doesn't launch with invalid token" do
         mocks = setup_canvas_lti_advantage
 
-        other_jwk = AtomicLti::Jwk.new 
+        other_jwk = AtomicLti::Jwk.new
         other_jwk.generate_keys
 
         fake_token = JWT.encode(

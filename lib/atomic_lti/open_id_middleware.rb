@@ -30,10 +30,15 @@ module AtomicLti
     end
 
     def handle_redirect(request)
+      return error!("Empty LTI Token") if request.params["id_token"].blank?
+
       lti_token = AtomicLti::Authorization.validate_token(
         request.params["id_token"],
       )
-      return not_found("Invalid launch") if lti_token.blank?
+
+      return error!("Invalid LTI Token") if lti_token.blank?
+
+      AtomicLti::Authorization.validate_lti!(lti_token)
 
       target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
       redirect_params = {
@@ -48,6 +53,8 @@ module AtomicLti
       )
 
       [200, { "Content-Type" => "text/html" }, [html]]
+    rescue => e
+      error!(e.message)
     end
 
     def matches_redirect?(request)
@@ -103,17 +110,21 @@ module AtomicLti
       end
     end
 
+    def error!(body = "Error", status = 500, headers = {"Content-Type" => "text/html"})
+      [status, headers, [body]]
+    end
+
     def call(env)
-     request = Rack::Request.new(env)
-     if init_paths.include?(request.path)
-       handle_init(request)
-     elsif matches_redirect?(request)
-       handle_redirect(request)
-     elsif matches_target_link?(request) && request.params["id_token"].present?
-       handle_lti_launch(env, request)
-     else
-       @app.call(env)
-     end
+      request = Rack::Request.new(env)
+      if init_paths.include?(request.path)
+        handle_init(request)
+      elsif matches_redirect?(request)
+        handle_redirect(request)
+      elsif matches_target_link?(request) && request.params["id_token"].present?
+        handle_lti_launch(env, request)
+      else
+        @app.call(env)
+      end
     end
 
     protected
@@ -207,29 +218,29 @@ module AtomicLti
 
     def valid_token(state:, id_token:, url:)
 
-          # Validate the s tate by checking the database for the nonce
-          valid_state = AtomicLti::OpenId.validate_open_id_state(state)
+      # Validate the state by checking the database for the nonce
+      valid_state = AtomicLti::OpenId.validate_open_id_state(state)
 
-          return false if !valid_state
+      return false if !valid_state
 
-          token = false
+      token = false
 
-          begin
-            token = AtomicLti::Authorization.validate_token(id_token)
-          rescue JWT::DecodeError => e
-            Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
-            return false
-          end
+      begin
+        token = AtomicLti::Authorization.validate_token(id_token)
+      rescue JWT::DecodeError => e
+        Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
+        return false
+      end
 
-          return false if token.nil?
+      return false if token.nil?
 
-          # Validate that we are at the target_link_uri
-          target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-          if target_link_uri != url
-            return false
-          end
+      # Validate that we are at the target_link_uri
+      target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
+      if target_link_uri != url
+        return false
+      end
 
-          token
+      token
     end
 
     def build_oidc_response(request, state, nonce, redirect_uri)

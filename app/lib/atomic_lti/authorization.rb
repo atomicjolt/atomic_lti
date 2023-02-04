@@ -7,6 +7,7 @@ module AtomicLti
       # Get the iss value from the original request during the oidc call.
       # Use that value to figure out which jwk we should use.
       decoded_token = JWT.decode(token, nil, false)
+
       iss = decoded_token.dig(0, "iss")
 
       platform = Platform.find_by(iss: iss)
@@ -28,6 +29,14 @@ module AtomicLti
 
       lti_token, _keys = JWT.decode(token, nil, true, { algorithms: ["RS256"], jwks: jwk_loader })
       lti_token
+    end
+
+    def self.validate_lti!(decoded_token)
+      raise AtomicLti::Exceptions::InvalidLTIVersion unless valid_lti_version?(decoded_token)
+    end
+
+    def self.valid_lti_version?(decoded_token)
+      decoded_token[AtomicLti::Definitions::LTI_VERSION].starts_with?("1.3")
     end
 
     def self.sign_tool_jwt(payload)

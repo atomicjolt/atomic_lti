@@ -38,5 +38,11 @@ module AtomicLti
 
     class RateLimitError < StandardError
     end
+
+    class InvalidLTIVersion < StandardError
+      def initialize(msg="Invalid LTI Version")
+        super(msg)
+      end
+    end
   end
 end

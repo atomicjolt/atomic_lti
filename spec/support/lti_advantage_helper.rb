@@ -22,7 +22,7 @@ def canvas_headers(options = {})
   }.merge(options)
 end
 
-def setup_canvas_lti_advantage(
+def setup_lti_advantage_db_entries(
   client_id: FactoryBot.generate(:client_id),
   iss: "https://canvas.instructure.com",
   lti_user_id: SecureRandom.uuid,
@@ -30,17 +30,14 @@ def setup_canvas_lti_advantage(
   message_type: "LtiResourceLinkRequest",
   resource_link_id: SecureRandom.hex
 )
-
-
   AtomicLti::Jwk.find_or_create_by(domain: nil)
-  
+
   # Add some platforms
-  AtomicLti::Platform.create_with( 
-    jwks_url: "https://canvas.instructure.com/api/lti/security/jwks", 
-    token_url: "https://canvas.instructure.com/login/oauth2/token", 
+  AtomicLti::Platform.create_with(
+    jwks_url: "https://canvas.instructure.com/api/lti/security/jwks",
+    token_url: "https://canvas.instructure.com/login/oauth2/token",
     oidc_url: "https://canvas.instructure.com/api/lti/authorize_redirect"
   ).find_or_create_by(iss: "https://canvas.instructure.com")
-  
 
   @iss = iss
   @client_id = client_id
@@ -60,6 +57,27 @@ def setup_canvas_lti_advantage(
 
   stub_canvas_jwk(canvas_jwk)
 
+  canvas_jwk
+end
+
+def setup_canvas_lti_advantage(
+  client_id: FactoryBot.generate(:client_id),
+  iss: "https://canvas.instructure.com",
+  lti_user_id: SecureRandom.uuid,
+  context_id: SecureRandom.hex(15),
+  message_type: "LtiResourceLinkRequest",
+  resource_link_id: SecureRandom.hex
+)
+
+  canvas_jwk = setup_lti_advantage_db_entries(
+    client_id: client_id,
+    iss: iss,
+    lti_user_id: lti_user_id,
+    context_id: context_id,
+    message_type: message_type,
+    resource_link_id: resource_link_id
+  )
+
   @decoded_id_token = build_payload(
       client_id: @client_id,
       iss: @iss,
@@ -68,7 +86,9 @@ def setup_canvas_lti_advantage(
       message_type: @message_type,
       resource_link_id: @resource_link_id,
       deployment_id: @deployment_id,
-    ).deep_stringify_keys
+  ).deep_stringify_keys
+
+  @decoded_id_token = yield(@decoded_id_token) if block_given?
 
   @id_token = JWT.encode(
     @decoded_id_token,
@@ -94,17 +114,17 @@ def setup_canvas_lti_advantage(
   }
 
   {
-     iss: @iss,
-     client_id: @client_id,
-     lti_user_id: @lti_user_id,
-     context_id: @context_id,
-     deployment_id: @deployment_id,
-     message_type: @message_type,
-     resourse_link_id: @resource_link_id,
-     id_token: @id_token,
-     state: @state,
-     params: @params,
-     decoded_id_token: @decoded_id_token
+    iss: @iss,
+    client_id: @client_id,
+    lti_user_id: @lti_user_id,
+    context_id: @context_id,
+    deployment_id: @deployment_id,
+    message_type: @message_type,
+    resourse_link_id: @resource_link_id,
+    id_token: @id_token,
+    state: @state,
+    params: @params,
+    decoded_id_token: @decoded_id_token
   }
 end
 
