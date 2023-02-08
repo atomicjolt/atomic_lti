@@ -93,5 +93,32 @@ module AtomicLti
       end
     end
 
+    describe "request_token_uncached" do
+      it "returns a token" do
+        mocks = setup_canvas_lti_advantage
+        stub_canvas_token
+        token = Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        expect(token["expires_in"]).to be_present
+      end
+
+      it "throws an exception when the deployment can't be found" do
+        mocks = setup_canvas_lti_advantage
+        stub_canvas_token
+        expect {
+          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: 'bad_id')
+        }.to raise_error(AtomicLti::Exceptions::NoLTIDeployment)
+      end
+
+      it "throws an exception when the platform can't be found" do
+        mocks = setup_canvas_lti_advantage
+        stub_canvas_token
+        deployment = AtomicLti::Deployment.find_by(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        deployment.platform.destroy
+        expect {
+          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        }.to raise_error(AtomicLti::Exceptions::NoLTIPlatform)
+      end
+    end
+
   end
 end
