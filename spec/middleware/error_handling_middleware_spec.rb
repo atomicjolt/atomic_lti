@@ -60,6 +60,105 @@ module AtomicLti
         status, _headers, _response = middleware.call(env)
         expect(status).to eq(500)
       end
+
+      it "returns status 500 when an LineItemError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::LineItemError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an ConfigurationError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::ConfigurationError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+      
+      it "returns status 500 when an NamesAndRolesError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::NamesAndRolesError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an ScoreError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::ScoreError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+      
+      it "returns status 500 when an StateError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::StateError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an OpenIDStateError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::OpenIDStateError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an OpenIDRedirectError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::OpenIDRedirectError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an JwtIssueError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::JwtIssueError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an LineItemMissing is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::LineItemMissing.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an RateLimitError is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::RateLimitError.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
+
+      it "returns status 500 when an InvalidLTIVersion is thrown" do
+        app = ->(env) do
+          raise AtomicLti::Exceptions::InvalidLTIVersion.new
+        end
+        middleware = ErrorHandlingMiddleware.new(app)
+        status, _headers, _response = middleware.call(env)
+        expect(status).to eq(500)
+      end
     end
   end
 end
