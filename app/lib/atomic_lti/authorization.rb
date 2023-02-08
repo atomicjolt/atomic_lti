@@ -35,6 +35,7 @@ module AtomicLti
 
     def self.validate_lti!(decoded_token)
       raise AtomicLti::Exceptions::InvalidLTIVersion unless valid_lti_version?(decoded_token)
+      true
     end
 
     def self.valid_lti_version?(decoded_token)
@@ -57,15 +58,15 @@ module AtomicLti
 
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       install = deployment.install
 
-      raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
+      raise AtomicLti::Exceptions::NoLTIInstall.new(iss: iss, deployment_id: deployment_id) if install.nil?
 
       platform = install.platform
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: deployment_id) if platform.nil?
 
       payload = {
         iss:  install.client_id,  # A unique identifier for the entity that issued the JWT
@@ -82,7 +83,7 @@ module AtomicLti
     def self.request_token(iss:, deployment_id:)
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       cache_key = "#{deployment.cache_key_with_version}/services_authorization"
       tries = 1
@@ -130,11 +131,11 @@ module AtomicLti
 
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       platform = deployment.platform
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: deployment_id) if platform.nil?
 
       result = HTTParty.post(
         platform.token_url,

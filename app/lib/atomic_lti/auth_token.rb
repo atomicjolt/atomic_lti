@@ -2,9 +2,9 @@ require "jwt"
 
 module AtomicLti
   module AuthToken
-  
+
     ALGORITHM = "HS512".freeze
-  
+
     # More information on jwt available at
     # http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html#rfc.section.4.1.6
     def self.issue_token(payload, exp = 24.hours.from_now, secret = nil, aud = nil, header_fields = {})
@@ -18,11 +18,11 @@ module AtomicLti
         header_fields,
       )
     end
-  
+
     def self.valid?(token, secret = nil, algorithm = ALGORITHM)
       decode(token, secret, true, algorithm)
     end
-  
+
     def self.decode(token, secret = nil, validate = true, algorithm = ALGORITHM)
       JWT.decode(
         token,

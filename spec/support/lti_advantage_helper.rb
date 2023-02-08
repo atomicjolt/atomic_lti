@@ -126,7 +126,8 @@ def setup_canvas_lti_advantage(
     id_token: @id_token,
     state: @state,
     params: @params,
-    decoded_id_token: @decoded_id_token
+    decoded_id_token: @decoded_id_token,
+    canvas_jwk: canvas_jwk,
   }
 end
 
@@ -135,6 +136,17 @@ def stub_canvas_jwk(jwk)
     to_return(
       status: 200,
       body: { keys: [jwk.to_json] }.to_json,
+      headers: canvas_headers,
+    )
+end
+
+def stub_canvas_token
+  stub_request(:post, AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL).
+    to_return(
+      status: 200,
+      body: {
+        expires_in: DateTime.now + 1.day,
+      }.to_json,
       headers: canvas_headers,
     )
 end
