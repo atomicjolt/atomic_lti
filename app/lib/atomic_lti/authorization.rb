@@ -39,7 +39,11 @@ module AtomicLti
     end
 
     def self.valid_lti_version?(decoded_token)
-      decoded_token[AtomicLti::Definitions::LTI_VERSION].starts_with?("1.3")
+      if decoded_token[AtomicLti::Definitions::LTI_VERSION]
+        decoded_token[AtomicLti::Definitions::LTI_VERSION].starts_with?("1.3")
+      else
+        false
+      end
     end
 
     def self.sign_tool_jwt(payload)

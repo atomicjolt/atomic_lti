@@ -32,7 +32,6 @@ module AtomicLti
 
     describe "init" do
       it "Handles init" do
-
         setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
         status, _headers, _response = subject.call(req_env)
@@ -86,6 +85,15 @@ module AtomicLti
       it "returns an error when the LTI version is invalid" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
+          { decoded_id_token: decoded_id_token }
+        end
+        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
+      end
+
+      it "returns an error when not LTI version is passed" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
           { decoded_id_token: decoded_id_token }
         end
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})

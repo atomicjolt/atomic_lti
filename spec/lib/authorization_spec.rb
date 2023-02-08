@@ -36,9 +36,18 @@ module AtomicLti
         expect(valid).to eq(true)
       end
 
-      it "returns false when the LTI version is invalidvalid" do
+      it "returns false when the LTI version is invalid" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
+          { decoded_id_token: decoded_id_token }
+        end
+        valid = Authorization.valid_lti_version?(mocks[:decoded_id_token])
+        expect(valid).to eq(false)
+      end
+
+      it "returns false when the LTI version is not present" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
           { decoded_id_token: decoded_id_token }
         end
         valid = Authorization.valid_lti_version?(mocks[:decoded_id_token])
