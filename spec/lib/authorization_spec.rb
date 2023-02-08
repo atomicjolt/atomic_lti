@@ -75,6 +75,31 @@ module AtomicLti
         expect(decoded_token["sub"]).to eq(mocks[:client_id])
         expect(decoded_token["aud"]).to eq("https://canvas.instructure.com/login/oauth2/token")
       end
+
+      it "throws an exception when the deployment can't be found" do
+        mocks = setup_canvas_lti_advantage
+        expect {
+          Authorization.client_assertion(iss: mocks[:iss], deployment_id: 'bad_id')
+        }.to raise_error(AtomicLti::Exceptions::NoLTIDeployment)
+      end
+
+      it "throws an exception when the install can't be found" do
+        mocks = setup_canvas_lti_advantage
+        deployment = AtomicLti::Deployment.find_by(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        deployment.install.destroy
+        expect {
+          Authorization.client_assertion(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        }.to raise_error(AtomicLti::Exceptions::NoLTIInstall)
+      end
+
+      it "throws an exception when the platform can't be found" do
+        mocks = setup_canvas_lti_advantage
+        deployment = AtomicLti::Deployment.find_by(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        deployment.platform.destroy
+        expect {
+          Authorization.client_assertion(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        }.to raise_error(AtomicLti::Exceptions::NoLTIPlatform)
+      end
     end
 
     describe "request_token" do
