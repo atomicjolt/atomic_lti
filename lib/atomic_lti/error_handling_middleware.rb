@@ -27,7 +27,7 @@ module AtomicLti
       render_error(env, 404, e.message)
 
     rescue AtomicLti::Exceptions::AtomicLtiException => e
-      render_error(env, 404, e.message)
+      render_error(env, 500, e.message)
     end
   end
 end

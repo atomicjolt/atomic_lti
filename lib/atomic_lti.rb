@@ -1,6 +1,7 @@
 require "atomic_lti/version"
 require "atomic_lti/engine"
 require "atomic_lti/open_id_middleware"
+require "atomic_lti/error_handling_middleware"
 
 module AtomicLti
 
