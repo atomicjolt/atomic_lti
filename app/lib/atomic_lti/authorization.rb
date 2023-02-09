@@ -12,9 +12,11 @@ module AtomicLti
 
       iss = decoded_token.dig(0, "iss")
 
+      raise AtomicLti::Exceptions::InvalidLTIToken.new("LTI token is missing iss") if iss.blank?
+
       platform = Platform.find_by(iss: iss)
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform(iss: iss, deployment_id: decoded_token.dig(0, "deployment_id")) if platform.nil?
 
       cache_key = "#{iss}_jwks"
 
@@ -31,19 +33,6 @@ module AtomicLti
 
       lti_token, _keys = JWT.decode(token, nil, true, { algorithms: ["RS256"], jwks: jwk_loader })
       lti_token
-    end
-
-    def self.validate_lti!(decoded_token)
-      raise AtomicLti::Exceptions::InvalidLTIVersion unless valid_lti_version?(decoded_token)
-      true
-    end
-
-    def self.valid_lti_version?(decoded_token)
-      if decoded_token[AtomicLti::Definitions::LTI_VERSION]
-        decoded_token[AtomicLti::Definitions::LTI_VERSION].starts_with?("1.3")
-      else
-        false
-      end
     end
 
     def self.sign_tool_jwt(payload)

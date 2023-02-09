@@ -36,7 +36,25 @@ module AtomicLti
     end
 
     class InvalidLTIVersion < AtomicLtiException
-      def initialize(msg="Invalid LTI Version")
+      def initialize(msg="Invalid LTI version")
+        super(msg)
+      end
+    end
+
+    class NoLTIVersion < AtomicLtiException
+      def initialize(msg=" LTI Version provided")
+        super(msg)
+      end
+    end
+
+    class NoLTIToken < AtomicLtiException
+      def initialize(msg="No LTI token provided")
+        super(msg)
+      end
+    end
+
+    class InvalidLTIToken < AtomicLtiException
+      def initialize(msg="Invalid LTI token provided")
         super(msg)
       end
     end

@@ -91,13 +91,34 @@ module AtomicLti
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
       end
 
-      it "returns an error when not LTI version is passed" do
+      it "returns an error when the LTI version is not passed" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
           { decoded_id_token: decoded_id_token }
         end
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
-        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::NoLTIVersion)
+      end
+
+      it "returns an error when the JWT isn't an LTI 1.3 JWT" do
+        mocks = setup_canvas_lti_advantage
+        bad_token = {
+          "name" => "bad_lti_token",
+        }
+        canvas_jwk = mocks[:canvas_jwk]
+        id_token ||= JWT.encode(
+          bad_token,
+          canvas_jwk.private_key,
+          canvas_jwk.alg,
+          kid: canvas_jwk.kid,
+          typ: "JWT",
+        )
+        params = {
+          "id_token" => id_token,
+          "state" => mocks[:state],
+        }
+        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: params})
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
     end
 

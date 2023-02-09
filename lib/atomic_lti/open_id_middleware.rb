@@ -30,15 +30,13 @@ module AtomicLti
     end
 
     def handle_redirect(request)
-      return error!("Empty LTI Token") if request.params["id_token"].blank?
+      raise AtomicLti::Exceptions::NoLTIToken if request.params["id_token"].blank?
 
       lti_token = AtomicLti::Authorization.validate_token(
         request.params["id_token"],
       )
 
-      return error!("Invalid LTI Token") if lti_token.blank?
-
-      AtomicLti::Authorization.validate_lti!(lti_token)
+      AtomicLti::Lti.validate!(lti_token)
 
       target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
       redirect_params = {

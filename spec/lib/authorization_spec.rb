@@ -11,50 +11,6 @@ module AtomicLti
       end
     end
 
-    describe "validate_lti!" do
-      it "throws an exception if the LTI version is invalid" do
-        mocks = setup_canvas_lti_advantage do |decoded_id_token|
-          decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
-          { decoded_id_token: decoded_id_token }
-        end
-        expect {
-          Authorization.validate_lti!(mocks[:decoded_id_token])
-        }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
-      end
-
-      it "ensures the LTI launch is valid" do
-        mocks = setup_canvas_lti_advantage
-        valid = Authorization.validate_lti!(mocks[:decoded_id_token])
-        expect(valid).to eq(true)
-      end
-    end
-
-    describe "valid_lti_version?" do
-      it "returns true when the LTI version is valid" do
-        mocks = setup_canvas_lti_advantage
-        valid = Authorization.valid_lti_version?(mocks[:decoded_id_token])
-        expect(valid).to eq(true)
-      end
-
-      it "returns false when the LTI version is invalid" do
-        mocks = setup_canvas_lti_advantage do |decoded_id_token|
-          decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
-          { decoded_id_token: decoded_id_token }
-        end
-        valid = Authorization.valid_lti_version?(mocks[:decoded_id_token])
-        expect(valid).to eq(false)
-      end
-
-      it "returns false when the LTI version is not present" do
-        mocks = setup_canvas_lti_advantage do |decoded_id_token|
-          decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
-          { decoded_id_token: decoded_id_token }
-        end
-        valid = Authorization.valid_lti_version?(mocks[:decoded_id_token])
-        expect(valid).to eq(false)
-      end
-    end
-
     describe "sign_tool_jwt" do
       it "returns a signed jwt" do
         mocks = setup_canvas_lti_advantage
