@@ -4,6 +4,12 @@ require "support/lti_advantage_helper"
 module AtomicLti
   RSpec.describe AtomicLti::Lti do
     describe "validate!" do
+      it "throws an exception if the token is blank" do
+        expect {
+          Lti.validate!(nil)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
       it "throws an exception if the LTI version is invalid" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
@@ -12,6 +18,16 @@ module AtomicLti
         expect {
           Lti.validate!(mocks[:decoded_id_token])
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
+      end
+
+      it "throws an exception if the iss is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete("iss")
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
       it "ensures the LTI token is valid" do

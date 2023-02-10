@@ -6,7 +6,13 @@ module AtomicLti
       end
 
       if decoded_token["iss"].blank?
-        raise AtomicLti::Exceptions::InvalidLTIToken.new("LTI token is missing iss")
+        raise AtomicLti::Exceptions::InvalidLTIToken.new("LTI token is missing required field iss")
+      end
+
+      if decoded_token[AtomicLti::Definitions::DEPLOYMENT_ID].blank?
+        raise AtomicLti::Exceptions::InvalidLTIToken.new(
+          "LTI token is missing required field #{AtomicLti::Definitions::DEPLOYMENT_ID}"
+        )
       end
 
       if decoded_token[AtomicLti::Definitions::LTI_VERSION].blank?

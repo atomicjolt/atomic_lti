@@ -2,12 +2,6 @@ require "rails_helper"
 require "support/lti_advantage_helper"
 
 module AtomicLti
-  FactoryBot.define do
-    sequence :client_id do |n|
-      "1200000#{n}"
-    end
-  end
-
   RSpec.describe AtomicLti::OpenIdMiddleware do
 
     let(:env) { Rack::MockRequest.env_for }

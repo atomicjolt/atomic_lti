@@ -9,6 +9,24 @@ module AtomicLti
         token = Authorization.validate_token(mocks[:id_token])
         expect(token.dig("errors", "errors")).to eq({})
       end
+
+      it "throws an exception when the token is missing the iss value" do
+        mocks = setup_canvas_lti_advantage
+        bad_token = {
+          "name" => "bad_lti_token",
+        }
+        canvas_jwk = mocks[:canvas_jwk]
+        token ||= JWT.encode(
+          bad_token,
+          canvas_jwk.private_key,
+          canvas_jwk.alg,
+          kid: canvas_jwk.kid,
+          typ: "JWT",
+        )
+        expect {
+          Authorization.validate_token(token)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
     end
 
     describe "sign_tool_jwt" do
