@@ -42,7 +42,7 @@ module AtomicLti
     end
 
     class NoLTIVersion < AtomicLtiException
-      def initialize(msg=" LTI Version provided")
+      def initialize(msg="No LTI Version provided")
         super(msg)
       end
     end
