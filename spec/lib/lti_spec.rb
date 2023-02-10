@@ -30,6 +30,16 @@ module AtomicLti
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
+      it "throws an exception if the deployment_id is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::DEPLOYMENT_ID)
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
       it "ensures the LTI token is valid" do
         mocks = setup_canvas_lti_advantage
         valid = Lti.validate!(mocks[:decoded_id_token])
