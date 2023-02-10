@@ -20,7 +20,7 @@ module AtomicLti
     end
 
     def version
-      token[AtomicLti::Definitions::VERSION]
+      token[AtomicLti::Definitions::LTI_VERSION]
     end
 
     def client_id
