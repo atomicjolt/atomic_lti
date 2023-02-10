@@ -114,6 +114,7 @@ module AtomicLti
         req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: params})
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
+
     end
 
     describe "lti_launches" do

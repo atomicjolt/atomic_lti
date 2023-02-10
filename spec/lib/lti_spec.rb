@@ -40,6 +40,56 @@ module AtomicLti
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
+      it "throws an exception if the target link uri claim is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::TARGET_LINK_URI_CLAIM)
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "throws an exception if the resource link claim is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::RESOURCE_LINK_CLAIM)
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "throws an exception if the message claim is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::MESSAGE_TYPE)
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "throws an exception if the roles claim is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::ROLES_CLAIM)
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "throws an exception if the User (sub) claim is missing" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete("sub")
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
       it "ensures the LTI token is valid" do
         mocks = setup_canvas_lti_advantage
         valid = Lti.validate!(mocks[:decoded_id_token])
