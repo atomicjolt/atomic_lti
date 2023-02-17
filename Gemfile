@@ -1,18 +1,18 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-# Specify your gem's dependencies in atomic_lti.gemspec.
+# Specify your gem"s dependencies in atomic_lti.gemspec.
 gemspec
 
-gem 'composite_primary_keys'
+gem "composite_primary_keys"
 
 group :development do
-  gem 'sqlite3'
+  gem "sqlite3"
 end
 
 
 group :development, :test do
-  gem 'byebug'
+  gem "byebug"
   gem "factory_bot_rails"
   gem "webmock"
 end
@@ -23,7 +23,6 @@ group :test do
   gem "launchy"
   gem "selenium-webdriver"
   gem "shoulda-matchers"
-  gem "webmock"
   gem "rspec"
   gem "rspec-rails"
 
@@ -33,4 +32,4 @@ group :test do
 end
 
 # To use a debugger
-# gem 'byebug', group: [:development, :test]
+# gem "byebug", group: [:development, :test]
