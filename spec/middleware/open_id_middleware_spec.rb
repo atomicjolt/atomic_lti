@@ -13,9 +13,10 @@ module AtomicLti
 
 
     before do
-      AtomicLti.oidc_init_path = '/oidc/init'
-      AtomicLti.oidc_redirect_path = '/oidc/redirect'
-      AtomicLti.target_link_path_prefixes = ['/lti_launches']
+      AtomicLti.oidc_init_path = "/oidc/init"
+      AtomicLti.oidc_redirect_path = "/oidc/redirect"
+      AtomicLti.target_link_path_prefixes = ["/lti_launches"]
+      AtomicLti.default_deep_link_path = "/lti_launches"
       AtomicLti.jwt_secret = "bar"
     end
 
@@ -27,7 +28,7 @@ module AtomicLti
     describe "init" do
       it "Handles init" do
         setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
         status, _headers, _response = subject.call(req_env)
         expect(status).to eq(302)
       end
@@ -36,10 +37,10 @@ module AtomicLti
     describe "redirect" do
       it "handles redirect" do
         mocks = setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0].include?(" <form action=\"http://atomicjolt-registrar.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
+        expect(response[0].include?(" <form action=\"http://atomicjolt-test.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
       end
 
       it "returns an error when the KID is missing from the JWT header" do
@@ -55,7 +56,7 @@ module AtomicLti
             id_token: id_token
           }
         end
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
       end
 
@@ -72,7 +73,7 @@ module AtomicLti
             id_token: id_token
           }
         end
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
       end
 
@@ -81,7 +82,7 @@ module AtomicLti
           decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
           { decoded_id_token: decoded_id_token }
         end
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
       end
 
@@ -90,7 +91,7 @@ module AtomicLti
           decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
           { decoded_id_token: decoded_id_token }
         end
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::NoLTIVersion)
       end
 
@@ -111,16 +112,42 @@ module AtomicLti
           "id_token" => id_token,
           "state" => mocks[:state],
         }
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: params})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: params})
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
     end
 
+    describe "lti deep link launches" do
+      it "redirects after the OIDC flow" do
+        mocks = setup_canvas_lti_advantage(
+          message_type: "LtiDeepLinkingRequest"
+        )
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        status, _headers, response = subject.call(req_env)
+
+        expect(status).to eq(200)
+        expect(response[0].include?(" <form action=\"http://atomicjolt-test.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
+      end
+
+      it "LTI launches" do
+        mocks = setup_canvas_lti_advantage(
+          message_type: "LtiDeepLinkingRequest"
+        )
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
+        status, _headers, response = subject.call(req_env)
+
+        returned_env = response[0]
+        expect(status).to eq(200)
+        expect(returned_env['atomic.validated.id_token']).to eq(mocks[:id_token])
+        expect(returned_env['atomic.validated.decoded_id_token']).to eq(mocks[:decoded_id_token])
+      end
+    end
+
     describe "lti_launches" do
       it "launches" do
         mocks = setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("http://atomicjolt-registrar.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
 
         returned_env = response[0]
@@ -148,7 +175,7 @@ module AtomicLti
           state: mocks[:state]
         }
 
-        req_env = Rack::MockRequest.env_for("http://atomicjolt-registrar.atomicjolt.xyz/lti_launches", {method: "POST", params: params})
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: params})
         status, _headers, response = subject.call(req_env)
 
         returned_env = response[0]

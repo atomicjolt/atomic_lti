@@ -38,8 +38,11 @@ module AtomicLti
 
       AtomicLti::Lti.validate!(lti_token)
 
-      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-      redirect_params = {
+      uri = URI(request.url)
+      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
+        File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
+
+        redirect_params = {
         state: request.params["state"],
         id_token: request.params["id_token"],
       }
@@ -74,7 +77,7 @@ module AtomicLti
     def matches_target_link?(request)
       AtomicLti.target_link_path_prefixes.any? do |prefix|
         request.path.starts_with? prefix
-      end
+      end || request.path.starts_with?(AtomicLti.default_deep_link_path)
     end
 
     def handle_lti_launch(env, request)
@@ -213,7 +216,6 @@ module AtomicLti
     end
 
     def valid_token(state:, id_token:, url:)
-
       # Validate the state by checking the database for the nonce
       valid_state = AtomicLti::OpenId.validate_open_id_state(state)
 
@@ -230,11 +232,7 @@ module AtomicLti
 
       return false if token.nil?
 
-      # Validate that we are at the target_link_uri
-      target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-      if target_link_uri != url
-        return false
-      end
+      AtomicLti::Lti.validate!(token, url, true)
 
       token
     end

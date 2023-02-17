@@ -153,6 +153,20 @@ end
 
 def resource_link_claim(id)
   {
+    "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint": {
+      "scope": [
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+      ],
+      "lineitems": "https://atomicjolt.instructure.com/api/lti/courses/3334/line_items",
+      "validation_context": nil,
+      "errors": {
+        "errors": {},
+      },
+    },
+    "https://purl.imsglobal.org/spec/lti/claim/target_link_uri": "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
     "https://purl.imsglobal.org/spec/lti/claim/resource_link": {
       "id": id,
       "description": nil,
@@ -188,19 +202,6 @@ def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, re
   payload = {
     "https://purl.imsglobal.org/spec/lti/claim/message_type": message_type,
     "https://purl.imsglobal.org/spec/lti/claim/version": "1.3.0",
-    "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint": {
-      "scope": [
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
-      ],
-      "lineitems": "https://atomicjolt.instructure.com/api/lti/courses/3334/line_items",
-      "validation_context": nil,
-      "errors": {
-        "errors": {},
-      },
-    },
     "aud": client_id,
     "azp": client_id,
     "https://purl.imsglobal.org/spec/lti/claim/deployment_id": deployment_id,
@@ -209,7 +210,6 @@ def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, re
     "iss": iss,
     "nonce": nonce,
     "sub": lti_user_id,
-    "https://purl.imsglobal.org/spec/lti/claim/target_link_uri": "http://atomicjolt-registrar.atomicjolt.xyz/lti_launches",
     "https://purl.imsglobal.org/spec/lti/claim/context": {
       "id": context_id,
       "label": "Intro Geology",

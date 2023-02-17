@@ -1,28 +1,23 @@
 # AtomicLti
-Short description and motivation.
+Atomic LTI implements the LTI Advantage specification.
 
 ## Usage
-How to use my plugin.
+Add the gem:
 
-## Installation
-Add this line to your application's Gemfile:
+  `gem 'atomic_lti', git: 'https://github.com/atomicjolt/atomic_lti.git', tag: '1.0.9'`
 
-```ruby
-gem 'atomic_lti'
-```
+Note that the gem is not open source and not available on RubyGems.org
 
-And then execute:
-```bash
-$ bundle
-```
+Add an initializer
+  `config/initializers/atomic_lti.rb`
 
-Or install it yourself as:
-```bash
-$ gem install atomic_lti
-```
+with the following contents. Adjust paths as needed.
 
-## Contributing
-Contribution directions go here.
+  `
+  AtomicLti.oidc_init_path = "/oidc/init"
+  AtomicLti.oidc_redirect_path = "/oidc/redirect"
+  AtomicLti.target_link_path_prefixes = ["/lti_launches"]
+  AtomicLti.default_deep_link_path = "/lti_launches"
+  AtomicLti.jwt_secret = Rails.application.secrets.auth0_client_secret
+  `
 
-## License
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
