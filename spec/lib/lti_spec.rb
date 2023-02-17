@@ -95,6 +95,14 @@ module AtomicLti
         valid = Lti.validate!(mocks[:decoded_id_token])
         expect(valid).to eq(true)
       end
+
+      it "handles a deep link payload" do
+        mocks = setup_canvas_lti_advantage(
+          message_type: "LtiDeepLinkingRequest"
+        )
+        valid = Lti.validate!(mocks[:decoded_id_token])
+        expect(valid).to eq(true)
+      end
     end
 
     describe "valid_version?" do
