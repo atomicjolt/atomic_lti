@@ -18,6 +18,7 @@ module AtomicLti
       AtomicLti.target_link_path_prefixes = ["/lti_launches"]
       AtomicLti.default_deep_link_path = "/lti_launches"
       AtomicLti.jwt_secret = "bar"
+      AtomicLti.scopes = AtomicLti::Definitions.scopes.join(" ")
     end
 
     it "Passes non lti launch request" do

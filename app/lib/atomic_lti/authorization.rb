@@ -115,7 +115,7 @@ module AtomicLti
       body = {
         grant_type: "client_credentials",
         client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-        scope: AtomicLti::Definitions.scopes.join(" "),
+        scope: AtomicLti.scopes,
         client_assertion: client_assertion(iss: iss, deployment_id: deployment_id),
       }
       headers = {
