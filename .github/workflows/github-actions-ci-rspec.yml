@@ -1,0 +1,73 @@
+name: rspec
+
+on: pull_request
+
+jobs:
+  rspec-test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby-version: [2.7]
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:13.8
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: postgres_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+
+      - name: Install dependencies
+        env:
+          RAILS_ENV: test
+          RAILS_GROUPS: build
+        run: |
+          bundle install
+
+      - name: Copy database config yml
+        run: cp test/dummy/config/ci.database.yml test/dummy/config/database.yml
+
+      - name: Create db
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:create
+
+      - name: Run migrations
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:migrate
+      
+      - name: Prepare assets
+        env:
+          RAILS_ENV: test
+        run: bundle exec rake db:test:prepare
+
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+        run: bundle exec rspec
+
+
