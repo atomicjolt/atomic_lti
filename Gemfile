@@ -31,5 +31,11 @@ group :test do
   gem "httparty", "0.20.0"
 end
 
+group :ci do
+  gem "brakeman"
+  gem "pronto"
+  gem "pronto-rubocop", require: false
+end
+
 # To use a debugger
 # gem "byebug", group: [:development, :test]
