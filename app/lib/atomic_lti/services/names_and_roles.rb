@@ -50,7 +50,7 @@ module AtomicLti
             url,
             headers: headers(
               {
-                "Content-Type" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
+                "Accept" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
               },
             ),
           ),
@@ -58,9 +58,8 @@ module AtomicLti
       end
 
       def verify_received_user_names(names_and_roles_memberships)
-        if names_and_roles_memberships.present?
+        if names_and_roles_memberships&.body.present?
           members = JSON.parse(names_and_roles_memberships.body)["members"]
-
           if members.present? && members.all? { |member| member["name"].nil? }
             raise(
               AtomicLti::Exceptions::NamesAndRolesError,

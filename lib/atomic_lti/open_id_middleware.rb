@@ -30,13 +30,24 @@ module AtomicLti
     end
 
     def handle_redirect(request)
+      raise AtomicLti::Exceptions::NoLTIToken if request.params["id_token"].blank?
+
       lti_token = AtomicLti::Authorization.validate_token(
         request.params["id_token"],
       )
-      return not_found("Invalid launch") if lti_token.blank?
 
-      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-      redirect_params = {
+      AtomicLti::Lti.validate!(lti_token)
+
+      uri = URI(request.url)
+      # Technically the target_link_uri is not required and the certification suite
+      # does not send it on a deep link launch. Typically target link uri will be present
+      # but at least for the certification suite we have to have a backup default
+      # value that can be set in the configuration of Atomic LTI using
+      # the default_deep_link_path
+      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
+        File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
+
+        redirect_params = {
         state: request.params["state"],
         id_token: request.params["id_token"],
       }
@@ -71,7 +82,7 @@ module AtomicLti
     def matches_target_link?(request)
       AtomicLti.target_link_path_prefixes.any? do |prefix|
         request.path.starts_with? prefix
-      end
+      end || request.path.starts_with?(AtomicLti.default_deep_link_path)
     end
 
     def handle_lti_launch(env, request)
@@ -103,17 +114,21 @@ module AtomicLti
       end
     end
 
+    def error!(body = "Error", status = 500, headers = {"Content-Type" => "text/html"})
+      [status, headers, [body]]
+    end
+
     def call(env)
-     request = Rack::Request.new(env)
-     if init_paths.include?(request.path)
-       handle_init(request)
-     elsif matches_redirect?(request)
-       handle_redirect(request)
-     elsif matches_target_link?(request) && request.params["id_token"].present?
-       handle_lti_launch(env, request)
-     else
-       @app.call(env)
-     end
+      request = Rack::Request.new(env)
+      if init_paths.include?(request.path)
+        handle_init(request)
+      elsif matches_redirect?(request)
+        handle_redirect(request)
+      elsif matches_target_link?(request) && request.params["id_token"].present?
+        handle_lti_launch(env, request)
+      else
+        @app.call(env)
+      end
     end
 
     protected
@@ -206,30 +221,25 @@ module AtomicLti
     end
 
     def valid_token(state:, id_token:, url:)
+      # Validate the state by checking the database for the nonce
+      valid_state = AtomicLti::OpenId.validate_open_id_state(state)
 
-          # Validate the s tate by checking the database for the nonce
-          valid_state = AtomicLti::OpenId.validate_open_id_state(state)
+      return false if !valid_state
 
-          return false if !valid_state
+      token = false
 
-          token = false
+      begin
+        token = AtomicLti::Authorization.validate_token(id_token)
+      rescue JWT::DecodeError => e
+        Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
+        return false
+      end
 
-          begin
-            token = AtomicLti::Authorization.validate_token(id_token)
-          rescue JWT::DecodeError => e
-            Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
-            return false
-          end
+      return false if token.nil?
 
-          return false if token.nil?
+      AtomicLti::Lti.validate!(token, url, true)
 
-          # Validate that we are at the target_link_uri
-          target_link_uri = token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-          if target_link_uri != url
-            return false
-          end
-
-          token
+      token
     end
 
     def build_oidc_response(request, state, nonce, redirect_uri)

@@ -16,6 +16,11 @@ module AtomicLti
       OpenSSL::PKey::RSA.new(pem)
     end
 
+    def public_key
+      pkey = OpenSSL::PKey::RSA.new(pem)
+      pkey.public_key
+    end
+
     def to_json
       pkey = OpenSSL::PKey::RSA.new(pem)
       json = JSON::JWK.new(pkey.public_key, kid: kid).as_json

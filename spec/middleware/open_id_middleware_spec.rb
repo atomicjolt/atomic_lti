@@ -2,12 +2,6 @@ require "rails_helper"
 require "support/lti_advantage_helper"
 
 module AtomicLti
-  FactoryBot.define do
-    sequence :client_id do |n|
-      "1200000#{n}"
-    end
-  end
-
   RSpec.describe AtomicLti::OpenIdMiddleware do
 
     let(:env) { Rack::MockRequest.env_for }
@@ -18,11 +12,13 @@ module AtomicLti
     subject { OpenIdMiddleware.new(app) }
 
 
-    before do 
-      AtomicLti.oidc_init_path = '/oidc/init'
-      AtomicLti.oidc_redirect_path = '/oidc/redirect'
-      AtomicLti.target_link_path_prefixes = ['/lti_launches']
+    before do
+      AtomicLti.oidc_init_path = "/oidc/init"
+      AtomicLti.oidc_redirect_path = "/oidc/redirect"
+      AtomicLti.target_link_path_prefixes = ["/lti_launches"]
+      AtomicLti.default_deep_link_path = "/lti_launches"
       AtomicLti.jwt_secret = "bar"
+      AtomicLti.scopes = AtomicLti::Definitions.scopes.join(" ")
     end
 
     it "Passes non lti launch request" do
@@ -30,30 +26,129 @@ module AtomicLti
       expect(status).to eq(200)
     end
 
-    describe "init" do 
+    describe "init" do
       it "Handles init" do
-        
         setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/init", {method: "POST", params: {"iss" => "https://canvas.instructure.com"}})
         status, _headers, _response = subject.call(req_env)
         expect(status).to eq(302)
       end
     end
 
     describe "redirect" do
-      it "handles redirect" do 
+      it "handles redirect" do
         mocks = setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("https://registrar.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0].include?(" <form action=\"http://atomicjolt-registrar.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
+        expect(response[0].include?(" <form action=\"http://atomicjolt-test.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
+      end
+
+      it "returns an error when the KID is missing from the JWT header" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token, canvas_jwk|
+          id_token = JWT.encode(
+            decoded_id_token,
+            canvas_jwk.private_key,
+            canvas_jwk.alg,
+            kid: "",
+            typ: "JWT",
+          )
+          {
+            id_token: id_token
+          }
+        end
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
+      end
+
+      it "returns an error when an incorrect KID is passed in the JWT header" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token, canvas_jwk|
+          id_token = JWT.encode(
+            decoded_id_token,
+            canvas_jwk.private_key,
+            canvas_jwk.alg,
+            kid: "2345",
+            typ: "JWT",
+          )
+          {
+            id_token: id_token
+          }
+        end
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(JWT::DecodeError)
+      end
+
+      it "returns an error when the LTI version is invalid" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::LTI_VERSION] = "1.4.3"
+          { decoded_id_token: decoded_id_token }
+        end
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIVersion)
+      end
+
+      it "returns an error when the LTI version is not passed" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token.delete(AtomicLti::Definitions::LTI_VERSION)
+          { decoded_id_token: decoded_id_token }
+        end
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::NoLTIVersion)
+      end
+
+      it "returns an error when the JWT isn't an LTI 1.3 JWT" do
+        mocks = setup_canvas_lti_advantage
+        bad_token = {
+          "name" => "bad_lti_token",
+        }
+        canvas_jwk = mocks[:canvas_jwk]
+        id_token ||= JWT.encode(
+          bad_token,
+          canvas_jwk.private_key,
+          canvas_jwk.alg,
+          kid: canvas_jwk.kid,
+          typ: "JWT",
+        )
+        params = {
+          "id_token" => id_token,
+          "state" => mocks[:state],
+        }
+        req_env = Rack::MockRequest.env_for("https://test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: params})
+        expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+    end
+
+    describe "lti deep link launches" do
+      it "redirects after the OIDC flow" do
+        mocks = setup_canvas_lti_advantage(
+          message_type: "LtiDeepLinkingRequest"
+        )
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/oidc/redirect", {method: "POST", params: mocks[:params]})
+        status, _headers, response = subject.call(req_env)
+
+        expect(status).to eq(200)
+        expect(response[0].include?(" <form action=\"http://atomicjolt-test.atomicjolt.xyz/lti_launches\" method=\"POST\">")).to eq(true)
+      end
+
+      it "LTI launches" do
+        mocks = setup_canvas_lti_advantage(
+          message_type: "LtiDeepLinkingRequest"
+        )
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
+        status, _headers, response = subject.call(req_env)
+
+        returned_env = response[0]
+        expect(status).to eq(200)
+        expect(returned_env['atomic.validated.id_token']).to eq(mocks[:id_token])
+        expect(returned_env['atomic.validated.decoded_id_token']).to eq(mocks[:decoded_id_token])
       end
     end
 
     describe "lti_launches" do
-      it "launches" do 
+      it "launches" do
         mocks = setup_canvas_lti_advantage
-        req_env = Rack::MockRequest.env_for("http://atomicjolt-registrar.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: mocks[:params]})
         status, _headers, response = subject.call(req_env)
 
         returned_env = response[0]
@@ -62,10 +157,10 @@ module AtomicLti
         expect(returned_env['atomic.validated.decoded_id_token']).to eq(mocks[:decoded_id_token])
       end
 
-      it "doesnt launch with invalid token" do
+      it "doesn't launch with invalid token" do
         mocks = setup_canvas_lti_advantage
 
-        other_jwk = AtomicLti::Jwk.new 
+        other_jwk = AtomicLti::Jwk.new
         other_jwk.generate_keys
 
         fake_token = JWT.encode(
@@ -81,7 +176,7 @@ module AtomicLti
           state: mocks[:state]
         }
 
-        req_env = Rack::MockRequest.env_for("http://atomicjolt-registrar.atomicjolt.xyz/lti_launches", {method: "POST", params: params})
+        req_env = Rack::MockRequest.env_for("http://atomicjolt-test.atomicjolt.xyz/lti_launches", {method: "POST", params: params})
         status, _headers, response = subject.call(req_env)
 
         returned_env = response[0]

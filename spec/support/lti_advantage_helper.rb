@@ -22,7 +22,7 @@ def canvas_headers(options = {})
   }.merge(options)
 end
 
-def setup_canvas_lti_advantage(
+def setup_lti_advantage_db_entries(
   client_id: FactoryBot.generate(:client_id),
   iss: "https://canvas.instructure.com",
   lti_user_id: SecureRandom.uuid,
@@ -30,17 +30,14 @@ def setup_canvas_lti_advantage(
   message_type: "LtiResourceLinkRequest",
   resource_link_id: SecureRandom.hex
 )
-
-
   AtomicLti::Jwk.find_or_create_by(domain: nil)
-  
+
   # Add some platforms
-  AtomicLti::Platform.create_with( 
-    jwks_url: "https://canvas.instructure.com/api/lti/security/jwks", 
-    token_url: "https://canvas.instructure.com/login/oauth2/token", 
+  AtomicLti::Platform.create_with(
+    jwks_url: "https://canvas.instructure.com/api/lti/security/jwks",
+    token_url: "https://canvas.instructure.com/login/oauth2/token",
     oidc_url: "https://canvas.instructure.com/api/lti/authorize_redirect"
   ).find_or_create_by(iss: "https://canvas.instructure.com")
-  
 
   @iss = iss
   @client_id = client_id
@@ -60,6 +57,27 @@ def setup_canvas_lti_advantage(
 
   stub_canvas_jwk(canvas_jwk)
 
+  canvas_jwk
+end
+
+def setup_canvas_lti_advantage(
+  client_id: FactoryBot.generate(:client_id),
+  iss: "https://canvas.instructure.com",
+  lti_user_id: SecureRandom.uuid,
+  context_id: SecureRandom.hex(15),
+  message_type: "LtiResourceLinkRequest",
+  resource_link_id: SecureRandom.hex
+)
+
+  canvas_jwk = setup_lti_advantage_db_entries(
+    client_id: client_id,
+    iss: iss,
+    lti_user_id: lti_user_id,
+    context_id: context_id,
+    message_type: message_type,
+    resource_link_id: resource_link_id
+  )
+
   @decoded_id_token = build_payload(
       client_id: @client_id,
       iss: @iss,
@@ -68,17 +86,21 @@ def setup_canvas_lti_advantage(
       message_type: @message_type,
       resource_link_id: @resource_link_id,
       deployment_id: @deployment_id,
-    ).deep_stringify_keys
+  ).deep_stringify_keys
 
-  @id_token = JWT.encode(
+  if block_given?
+    result = yield(@decoded_id_token, canvas_jwk)
+    @decoded_id_token = result[:decoded_id_token] if result[:decoded_id_token]
+    @id_token = result[:id_token]
+  end
+
+  @id_token ||= JWT.encode(
     @decoded_id_token,
     canvas_jwk.private_key,
     canvas_jwk.alg,
     kid: canvas_jwk.kid,
     typ: "JWT",
   )
-
-  @lti_token = AtomicLti::Authorization.validate_token(@id_token)
 
   nonce = SecureRandom.hex(64)
   AtomicLti::OpenIdState.create!(nonce: nonce)
@@ -94,17 +116,18 @@ def setup_canvas_lti_advantage(
   }
 
   {
-     iss: @iss,
-     client_id: @client_id,
-     lti_user_id: @lti_user_id,
-     context_id: @context_id,
-     deployment_id: @deployment_id,
-     message_type: @message_type,
-     resourse_link_id: @resource_link_id,
-     id_token: @id_token,
-     state: @state,
-     params: @params,
-     decoded_id_token: @decoded_id_token
+    iss: @iss,
+    client_id: @client_id,
+    lti_user_id: @lti_user_id,
+    context_id: @context_id,
+    deployment_id: @deployment_id,
+    message_type: @message_type,
+    resourse_link_id: @resource_link_id,
+    id_token: @id_token,
+    state: @state,
+    params: @params,
+    decoded_id_token: @decoded_id_token,
+    canvas_jwk: canvas_jwk,
   }
 end
 
@@ -117,8 +140,33 @@ def stub_canvas_jwk(jwk)
     )
 end
 
+def stub_canvas_token
+  stub_request(:post, AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL).
+    to_return(
+      status: 200,
+      body: {
+        expires_in: DateTime.now + 1.day,
+      }.to_json,
+      headers: canvas_headers,
+    )
+end
+
 def resource_link_claim(id)
   {
+    "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint": {
+      "scope": [
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+      ],
+      "lineitems": "https://atomicjolt.instructure.com/api/lti/courses/3334/line_items",
+      "validation_context": nil,
+      "errors": {
+        "errors": {},
+      },
+    },
+    "https://purl.imsglobal.org/spec/lti/claim/target_link_uri": "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
     "https://purl.imsglobal.org/spec/lti/claim/resource_link": {
       "id": id,
       "description": nil,
@@ -154,19 +202,6 @@ def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, re
   payload = {
     "https://purl.imsglobal.org/spec/lti/claim/message_type": message_type,
     "https://purl.imsglobal.org/spec/lti/claim/version": "1.3.0",
-    "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint": {
-      "scope": [
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
-      ],
-      "lineitems": "https://atomicjolt.instructure.com/api/lti/courses/3334/line_items",
-      "validation_context": nil,
-      "errors": {
-        "errors": {},
-      },
-    },
     "aud": client_id,
     "azp": client_id,
     "https://purl.imsglobal.org/spec/lti/claim/deployment_id": deployment_id,
@@ -175,7 +210,6 @@ def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, re
     "iss": iss,
     "nonce": nonce,
     "sub": lti_user_id,
-    "https://purl.imsglobal.org/spec/lti/claim/target_link_uri": "http://atomicjolt-registrar.atomicjolt.xyz/lti_launches",
     "https://purl.imsglobal.org/spec/lti/claim/context": {
       "id": context_id,
       "label": "Intro Geology",

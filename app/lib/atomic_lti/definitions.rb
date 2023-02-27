@@ -150,19 +150,19 @@ module AtomicLti
       "https://#{lms_host(payload)}"
     end
 
-    def self.deep_link_launch?(jwt_body)
-      jwt_body[AtomicLti::Definitions::MESSAGE_TYPE] == "LtiDeepLinkingRequest"
+    def self.deep_link_launch?(payload)
+      payload[AtomicLti::Definitions::MESSAGE_TYPE] == "LtiDeepLinkingRequest"
     end
 
-    def self.names_and_roles_launch?(jwt_body)
-      return false unless jwt_body[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]
+    def self.names_and_roles_launch?(payload)
+      return false unless payload[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]
 
-      jwt_body[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]["service_versions"] ==
+      payload[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]["service_versions"] ==
         AtomicLti::Definitions::NAMES_AND_ROLES_SERVICE_VERSIONS
     end
 
-    def self.assignment_and_grades_launch?(jwt_body)
-      jwt_body[AtomicLti::Definitions::AGS_CLAIM]
+    def self.assignment_and_grades_launch?(payload)
+      payload[AtomicLti::Definitions::AGS_CLAIM]
     end
 
   end

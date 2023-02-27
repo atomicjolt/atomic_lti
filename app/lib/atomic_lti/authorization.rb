@@ -1,3 +1,5 @@
+require "jwt"
+
 module AtomicLti
   class Authorization
 
@@ -7,11 +9,14 @@ module AtomicLti
       # Get the iss value from the original request during the oidc call.
       # Use that value to figure out which jwk we should use.
       decoded_token = JWT.decode(token, nil, false)
+
       iss = decoded_token.dig(0, "iss")
+
+      raise AtomicLti::Exceptions::InvalidLTIToken.new("LTI token is missing iss") if iss.blank?
 
       platform = Platform.find_by(iss: iss)
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform(iss: iss, deployment_id: decoded_token.dig(0, "deployment_id")) if platform.nil?
 
       cache_key = "#{iss}_jwks"
 
@@ -46,15 +51,15 @@ module AtomicLti
 
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       install = deployment.install
 
-      raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
+      raise AtomicLti::Exceptions::NoLTIInstall.new(iss: iss, deployment_id: deployment_id) if install.nil?
 
       platform = install.platform
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: deployment_id) if platform.nil?
 
       payload = {
         iss:  install.client_id,  # A unique identifier for the entity that issued the JWT
@@ -71,7 +76,7 @@ module AtomicLti
     def self.request_token(iss:, deployment_id:)
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       cache_key = "#{deployment.cache_key_with_version}/services_authorization"
       tries = 1
@@ -110,7 +115,7 @@ module AtomicLti
       body = {
         grant_type: "client_credentials",
         client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-        scope: AtomicLti::Definitions.scopes.join(" "),
+        scope: AtomicLti.scopes,
         client_assertion: client_assertion(iss: iss, deployment_id: deployment_id),
       }
       headers = {
@@ -119,11 +124,11 @@ module AtomicLti
 
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       platform = deployment.platform
 
-      raise AtomicLti::Exceptions::NoLTIPlatform if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: deployment_id) if platform.nil?
 
       result = HTTParty.post(
         platform.token_url,

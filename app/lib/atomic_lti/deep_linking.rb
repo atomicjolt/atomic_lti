@@ -7,10 +7,10 @@ module AtomicLti
     def self.create_deep_link_jwt(iss:, deployment_id:, content_items:, deep_link_claim_data: nil)
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment(iss, deployment_id) if deployment.nil?
 
       install = deployment.install
-      raise AtomicLti::Exceptions::NoLTIInstall if install.nil?
+      raise AtomicLti::Exceptions::NoLTIInstall(iss, deployment_id) if install.nil?
 
       payload = {
         iss: install.client_id, # A unique identifier for the entity that issued the JWT

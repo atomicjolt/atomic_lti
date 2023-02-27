@@ -1,42 +1,87 @@
 module AtomicLti
   module Exceptions
-    class LineItemError < StandardError
+
+    # General exceptions
+    class AtomicLtiException < StandardError
     end
 
-    class ConfigurationError < StandardError
+    class LineItemError < AtomicLtiException
     end
 
-    class NamesAndRolesError < StandardError
+    class ConfigurationError < AtomicLtiException
     end
 
-    class ScoreError < StandardError
+    class NamesAndRolesError < AtomicLtiException
     end
 
-    class NoLTIDeployment < StandardError
+    class ScoreError < AtomicLtiException
     end
 
-    class NoLTIInstall < StandardError
+    class StateError < AtomicLtiException
     end
 
-    class NoLTIPlatform < StandardError
+    class OpenIDStateError < AtomicLtiException
     end
 
-    class StateError < StandardError
+    class OpenIDRedirectError < AtomicLtiException
     end
 
-    class OpenIDStateError < StandardError
-    end
-
-    class OpenIDRedirectError < StandardError
-    end
-
-    class JwtIssueError < StandardError
+    class JwtIssueError < AtomicLtiException
     end
 
     class LineItemMissing < LineItemError
     end
 
-    class RateLimitError < StandardError
+    class RateLimitError < AtomicLtiException
+    end
+
+    class InvalidLTIVersion < AtomicLtiException
+      def initialize(msg="Invalid LTI version")
+        super(msg)
+      end
+    end
+
+    class NoLTIVersion < AtomicLtiException
+      def initialize(msg="No LTI Version provided")
+        super(msg)
+      end
+    end
+
+    class NoLTIToken < AtomicLtiException
+      def initialize(msg="No LTI token provided")
+        super(msg)
+      end
+    end
+
+    class InvalidLTIToken < AtomicLtiException
+      def initialize(msg="Invalid LTI token provided")
+        super(msg)
+      end
+    end
+
+    # Not found exceptions
+    class AtomicLtiNotFoundException < StandardError
+    end
+
+    class NoLTIDeployment < AtomicLtiNotFoundException
+      def initialize(iss:, deployment_id:)
+        msg="No LTI Deployment found for iss: #{iss} and deployment_id #{deployment_id}"
+        super(msg)
+      end
+    end
+
+    class NoLTIInstall < AtomicLtiNotFoundException
+      def initialize(iss:, deployment_id:)
+        msg="No LTI Install found for iss: #{iss} and deployment_id #{deployment_id}"
+        super(msg)
+      end
+    end
+
+    class NoLTIPlatform < AtomicLtiNotFoundException
+      def initialize(iss:, deployment_id:)
+        msg="No LTI Platform associated with the LTI Install. iss: #{iss} and deployment_id #{deployment_id}"
+        super(msg)
+      end
     end
   end
 end

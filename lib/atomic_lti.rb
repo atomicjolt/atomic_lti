@@ -1,6 +1,8 @@
 require "atomic_lti/version"
 require "atomic_lti/engine"
 require "atomic_lti/open_id_middleware"
+require "atomic_lti/error_handling_middleware"
+require_relative "../app/lib/atomic_lti/definitions"
 
 module AtomicLti
 
@@ -14,8 +16,9 @@ module AtomicLti
   mattr_accessor :oidc_init_path
   mattr_accessor :oidc_redirect_path
   mattr_accessor :target_link_path_prefixes
+  mattr_accessor :default_deep_link_path
   mattr_accessor :jwt_secret
-
+  mattr_accessor :scopes
 
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
