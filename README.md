@@ -6,8 +6,6 @@ Add the gem:
 
   `gem 'atomic_lti', git: 'https://github.com/atomicjolt/atomic_lti.git', tag: '1.0.9'`
 
-Note that the gem is not open source and not available on RubyGems.org
-
 Add an initializer
   `config/initializers/atomic_lti.rb`
 

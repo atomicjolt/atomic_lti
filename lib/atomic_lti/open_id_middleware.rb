@@ -39,6 +39,11 @@ module AtomicLti
       AtomicLti::Lti.validate!(lti_token)
 
       uri = URI(request.url)
+      # Technically the target_link_uri is not required and the certification suite
+      # does not send it on a deep link launch. Typically target link uri will be present
+      # but at least for the certification suite we have to have a backup default
+      # value that can be set in the configuration of Atomic LTI using
+      # the default_deep_link_path
       target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
