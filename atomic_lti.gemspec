@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.name        = "atomic_lti"
   spec.version     = AtomicLti::VERSION
   spec.authors     = ["Matt Petro", "Justin Ball"]
-  spec.email       = ["matt.petro@atomicjolt.com", "justin.ball@atomicjolt.com"]
+  spec.email       = ["matt.petro@atomicjolt.com", "justin.ball@atomicjolt.com", "nick.benoit@atomicjolt.com"]
   spec.homepage    = "https://github.com/atomicjolt/atomic_lti"
   spec.summary     = "AtomicLti implements the LTI Advantage specification."
   spec.description = "AtomicLti implements the LTI Advantage specification. This gem does contain source code specific to other Atomic Jolt products"
