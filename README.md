@@ -1,12 +1,28 @@
 # AtomicLti
 Atomic LTI implements the LTI Advantage specification.
 
+## Installation
+Add this line to your application's Gemfile:
+
+```ruby
+gem "atomic_lti"
+```
+
+And then execute:
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+```bash
+$ gem install atomic_tenant
+```
+
+Then install the migrations:
+./bin/rails atomic_lti:install:migrations
+
 ## Usage
-Add the gem:
-
-  `gem 'atomic_lti', git: 'https://github.com/atomicjolt/atomic_lti.git', tag: '1.0.9'`
-
-Add an initializer
+Create a new initializer:
   `config/initializers/atomic_lti.rb`
 
 with the following contents. Adjust paths as needed.
@@ -20,3 +36,5 @@ with the following contents. Adjust paths as needed.
   AtomicLti.scopes = AtomicLti::Definitions.scopes.join(" ")
   `
 
+## License
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
