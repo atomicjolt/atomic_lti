@@ -28,7 +28,7 @@ group :test do
 
   gem "jwt", "2.3.0"
   gem "json-jwt", "1.13.0"
-  gem "httparty", "0.20.0"
+  gem "httparty", "0.21.0"
 end
 
 group :ci do
