@@ -18,11 +18,11 @@ group :development, :test do
 end
 
 group :test do
-  gem "capybara"
-  gem "database_cleaner"
+  #gem "capybara"
+  #gem "database_cleaner"
   gem "launchy"
-  gem "selenium-webdriver"
-  gem "shoulda-matchers"
+  #gem "selenium-webdriver"
+  #gem "shoulda-matchers"
   gem "rspec"
   gem "rspec-rails"
 

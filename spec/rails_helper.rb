@@ -1,13 +1,15 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
-require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
-require_relative '../test/dummy/config/environment'
+require "spec_helper"
+ENV["RAILS_ENV"] ||= "test"
+require_relative "../test/dummy/config/environment"
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
-require 'rspec/rails'
-require "database_cleaner"
+require "rspec/rails"
+#require "database_cleaner"
 require "webmock/rspec"
 require "factories/_common.rb"
+require "support/lti_advantage_helper"
+require "support/http_mocks"
 
 # Add additional requires below this line. Rails is not loaded until this point!
 
@@ -69,23 +71,23 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     FactoryBot.find_definitions
-    begin
-      DatabaseCleaner.strategy = :transaction
-      DatabaseCleaner.clean_with(:transaction)
+    # begin
+    #   DatabaseCleaner.strategy = :transaction
+    #   DatabaseCleaner.clean_with(:transaction)
 
-      # DatabaseCleaner.strategy = :truncation, { only: ["authentications"] }
-      DatabaseCleaner.start
-      # FactoryBot.lint
-    ensure
-      DatabaseCleaner.clean
-    end
+    #   # DatabaseCleaner.strategy = :truncation, { only: ["authentications"] }
+    #   DatabaseCleaner.start
+    #   # FactoryBot.lint
+    # ensure
+    #   DatabaseCleaner.clean
+    # end
   end
 
-  config.append_after(:each) do
-    DatabaseCleaner.clean
-  end
+  # config.append_after(:each) do
+  #   DatabaseCleaner.clean
+  # end
 
-  config.before(:each) do
-    DatabaseCleaner.start
-  end
+  # config.before(:each) do
+  #   DatabaseCleaner.start
+  # end
 end
