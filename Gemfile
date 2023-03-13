@@ -11,14 +11,10 @@ group :development do
 end
 
 
-group :development, :test, :linter do
+group :development, :test do
   gem "byebug"
   gem "factory_bot_rails"
   gem "webmock"
-  gem "rubocop"
-  gem "rubocop-performance"
-  gem "rubocop-rails"
-  gem "rubocop-rspec"
 end
 
 group :test do
