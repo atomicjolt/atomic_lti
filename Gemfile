@@ -11,18 +11,17 @@ group :development do
 end
 
 
-group :development, :test do
+group :development, :test, :linter do
   gem "byebug"
   gem "factory_bot_rails"
+  gem "rubocop"
+  gem "rubocop-rails"
+  gem "rubocop-rspec"
   gem "webmock"
 end
 
 group :test do
-  #gem "capybara"
-  #gem "database_cleaner"
   gem "launchy"
-  #gem "selenium-webdriver"
-  #gem "shoulda-matchers"
   gem "rspec"
   gem "rspec-rails"
 
@@ -36,6 +35,3 @@ group :ci do
   gem "pronto"
   gem "pronto-rubocop", require: false
 end
-
-# To use a debugger
-# gem "byebug", group: [:development, :test]
