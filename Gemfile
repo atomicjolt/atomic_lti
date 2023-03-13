@@ -10,7 +10,6 @@ group :development do
   gem "sqlite3"
 end
 
-
 group :development, :test, :linter do
   gem "byebug"
   gem "factory_bot_rails"

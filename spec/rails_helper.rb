@@ -4,10 +4,10 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../test/dummy/config/environment"
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
+
 require "rspec/rails"
-#require "database_cleaner"
 require "webmock/rspec"
-require "factories/_common.rb"
+require "factories/_common"
 require "support/lti_advantage_helper"
 require "support/http_mocks"
 
@@ -37,7 +37,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  config.fixture_path = Rails.root.join("/spec/fixtures")
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
