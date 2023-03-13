@@ -1,13 +1,15 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
-require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
-require_relative '../test/dummy/config/environment'
+require "spec_helper"
+ENV["RAILS_ENV"] ||= "test"
+require_relative "../test/dummy/config/environment"
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
-require 'rspec/rails'
-require "database_cleaner"
+
+require "rspec/rails"
 require "webmock/rspec"
-require "factories/_common.rb"
+require "factories/_common"
+require "support/lti_advantage_helper"
+require "support/http_mocks"
 
 # Add additional requires below this line. Rails is not loaded until this point!
 
@@ -35,7 +37,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  config.fixture_path = Rails.root.join("/spec/fixtures")
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -69,23 +71,23 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     FactoryBot.find_definitions
-    begin
-      DatabaseCleaner.strategy = :transaction
-      DatabaseCleaner.clean_with(:transaction)
+    # begin
+    #   DatabaseCleaner.strategy = :transaction
+    #   DatabaseCleaner.clean_with(:transaction)
 
-      # DatabaseCleaner.strategy = :truncation, { only: ["authentications"] }
-      DatabaseCleaner.start
-      # FactoryBot.lint
-    ensure
-      DatabaseCleaner.clean
-    end
+    #   # DatabaseCleaner.strategy = :truncation, { only: ["authentications"] }
+    #   DatabaseCleaner.start
+    #   # FactoryBot.lint
+    # ensure
+    #   DatabaseCleaner.clean
+    # end
   end
 
-  config.append_after(:each) do
-    DatabaseCleaner.clean
-  end
+  # config.append_after(:each) do
+  #   DatabaseCleaner.clean
+  # end
 
-  config.before(:each) do
-    DatabaseCleaner.start
-  end
+  # config.before(:each) do
+  #   DatabaseCleaner.start
+  # end
 end

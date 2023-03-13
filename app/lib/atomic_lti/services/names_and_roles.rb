@@ -43,7 +43,7 @@ module AtomicLti
               else
                 uri = Addressable::URI.parse(endpoint)
                 uri.query_values = (uri.query_values || {}).merge(query)
-                uri
+                uri.to_str
               end
         verify_received_user_names(
           HTTParty.get(
