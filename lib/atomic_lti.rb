@@ -3,7 +3,7 @@ require "atomic_lti/engine"
 require "atomic_lti/open_id_middleware"
 require "atomic_lti/error_handling_middleware"
 require_relative "../app/lib/atomic_lti/definitions"
-
+require_relative "../app/lib/atomic_lti/exceptions"
 module AtomicLti
 
   # Set this to true to scope context_id's to the ISS rather than

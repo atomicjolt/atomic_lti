@@ -33,12 +33,12 @@ module AtomicLti
     # Converts old lti into lti advantage
     # NOTE this is a work in progress and may not correctly convert all LTI configs.
     def self.lti_to_lti_advantage(jwk, domain, args = {})
-      raise ::Exceptions::LtiConfigMissing, "Please provide an LTI launch url" if args[:launch_url].blank?
-      raise ::Exceptions::LtiConfigMissing, "Please provide an LTI secure launch url" if args[:secure_launch_url].blank?
+      raise AtomicLti::Exceptions::LtiConfigMissing, "Please provide an LTI launch url" if args[:launch_url].blank?
+      raise AtomicLti::Exceptions::LtiConfigMissing, "Please provide an LTI secure launch url" if args[:secure_launch_url].blank?
 
       if args[:content_migration].present?
-        raise Exceptions::LtiConfigMissing, "Please provide an IMS export url" if args[:export_url].blank?
-        raise Exceptions::LtiConfigMissing, "Please provide an IMS import url" if args[:import_url].blank?
+        raise AtomicLti::Exceptions::LtiConfigMissing, "Please provide an IMS export url" if args[:export_url].blank?
+        raise AtomicLti::Exceptions::LtiConfigMissing, "Please provide an IMS import url" if args[:import_url].blank?
       end
 
       {

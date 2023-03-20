@@ -2,15 +2,15 @@ module AtomicLti
 
   module DeepLinking
 
-#   # ###########################################################
-#   # Create a jwt to sign a response to the platform
+    # ###########################################################
+    # Create a jwt to sign a response to the platform
     def self.create_deep_link_jwt(iss:, deployment_id:, content_items:, deep_link_claim_data: nil)
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
-      raise AtomicLti::Exceptions::NoLTIDeployment(iss, deployment_id) if deployment.nil?
+      raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
       install = deployment.install
-      raise AtomicLti::Exceptions::NoLTIInstall(iss, deployment_id) if install.nil?
+      raise AtomicLti::Exceptions::NoLTIInstall.new(iss: iss, deployment_id: deployment_id) if install.nil?
 
       payload = {
         iss: install.client_id, # A unique identifier for the entity that issued the JWT
@@ -23,7 +23,7 @@ module AtomicLti
         AtomicLti::Definitions::MESSAGE_TYPE => "LtiDeepLinkingResponse",
         AtomicLti::Definitions::LTI_VERSION => "1.3.0",
         AtomicLti::Definitions::DEPLOYMENT_ID => deployment_id,
-        AtomicLti::Definitions::CONTENT_ITEM_CLAIM => content_items
+        AtomicLti::Definitions::CONTENT_ITEM_CLAIM => content_items,
       }
 
       if deep_link_claim_data.present?

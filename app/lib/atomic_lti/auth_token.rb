@@ -13,7 +13,7 @@ module AtomicLti
       payload["aud"] = aud || Rails.application.secrets.auth0_client_id
       JWT.encode(
         payload,
-        AtomicLti.jwt_secret,
+        secret || AtomicLti.jwt_secret,
         ALGORITHM,
         header_fields,
       )
@@ -26,7 +26,7 @@ module AtomicLti
     def self.decode(token, secret = nil, validate = true, algorithm = ALGORITHM)
       JWT.decode(
         token,
-        AtomicLti.jwt_secret,
+        secret || AtomicLti.jwt_secret,
         validate,
         { algorithm: algorithm },
       )

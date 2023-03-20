@@ -134,7 +134,7 @@ module AtomicLti
 
     OBSERVER_ROLES = [
       MENTOR_INSTITUTION_ROLE,
-      #NON_CREDIT_LEARNER,
+      # NON_CREDIT_LEARNER,
     ].freeze
 
     def self.lms_host(payload)
@@ -143,7 +143,9 @@ module AtomicLti
              else
                payload.dig(AtomicLti::Definitions::LAUNCH_PRESENTATION, "return_url")
              end
-      UrlHelper.safe_host(host)
+
+      host = "https://#{host}" unless host&.start_with?("http")
+      URI.parse(host).host
     end
 
     def self.lms_url(payload)
@@ -155,14 +157,14 @@ module AtomicLti
     end
 
     def self.names_and_roles_launch?(payload)
-      return false unless payload[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]
+      return false unless payload[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM].present?
 
       payload[AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM]["service_versions"] ==
         AtomicLti::Definitions::NAMES_AND_ROLES_SERVICE_VERSIONS
     end
 
     def self.assignment_and_grades_launch?(payload)
-      payload[AtomicLti::Definitions::AGS_CLAIM]
+      payload[AtomicLti::Definitions::AGS_CLAIM].present?
     end
 
   end

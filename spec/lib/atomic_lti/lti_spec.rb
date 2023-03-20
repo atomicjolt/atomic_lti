@@ -98,7 +98,7 @@ module AtomicLti
 
       it "handles a deep link payload" do
         mocks = setup_canvas_lti_advantage(
-          message_type: "LtiDeepLinkingRequest"
+          message_type: "LtiDeepLinkingRequest",
         )
         valid = Lti.validate!(mocks[:decoded_id_token])
         expect(valid).to eq(true)
@@ -130,6 +130,5 @@ module AtomicLti
         expect(valid).to eq(false)
       end
     end
-
   end
 end
