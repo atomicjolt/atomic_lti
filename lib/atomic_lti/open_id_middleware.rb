@@ -6,13 +6,13 @@ module AtomicLti
 
     def init_paths
       [
-        AtomicLti.oidc_init_path
+        AtomicLti.oidc_init_path,
       ]
     end
 
     def redirect_paths
       [
-        AtomicLti.oidc_redirect_path
+        AtomicLti.oidc_redirect_path,
       ]
     end
 
@@ -47,7 +47,7 @@ module AtomicLti
       target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
-        redirect_params = {
+      redirect_params = {
         state: request.params["state"],
         id_token: request.params["id_token"],
       }
@@ -63,6 +63,7 @@ module AtomicLti
 
     def matches_redirect?(request)
       raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank?
+
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
@@ -99,13 +100,13 @@ module AtomicLti
         update_deployment(id_token: decoded_jwt)
         update_lti_context(id_token: decoded_jwt)
 
-        errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'errors')
-        if errors.present? && !errors['errors'].empty?
+        errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "errors")
+        if errors.present? && !errors["errors"].empty?
           Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
         end
 
-        env['atomic.validated.decoded_id_token'] = decoded_jwt
-        env['atomic.validated.id_token'] = id_token
+        env["atomic.validated.decoded_id_token"] = decoded_jwt
+        env["atomic.validated.id_token"] = id_token
 
         @app.call(env)
       else
@@ -134,18 +135,19 @@ module AtomicLti
     protected
 
     def update_platform_instance(id_token:)
-      if id_token[AtomicLti::Definitions::TOOL_PLATFORM_CLAIM].present? && id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'guid').present?
-        name = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'name')
-        version = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'version')
-        product_family_code = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'product_family_code')
+      if id_token[AtomicLti::Definitions::TOOL_PLATFORM_CLAIM].present? &&
+          id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "guid").present?
+        name = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "name")
+        version = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "version")
+        product_family_code = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "product_family_code")
 
         AtomicLti::PlatformInstance.create_with(
           name: name,
           version: version,
           product_family_code: product_family_code,
         ).find_or_create_by!(
-          iss: id_token['iss'],
-          guid: id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, 'guid')
+          iss: id_token["iss"],
+          guid: id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "guid"),
         ).update!(
           name: name,
           version: version,
@@ -164,7 +166,7 @@ module AtomicLti
 
         AtomicLti::Install.find_or_create_by!(
           iss: iss,
-          client_id: client_id
+          client_id: client_id,
         )
       else
         Rails.logger.info("No client_id recieved: #{id_token}")
@@ -172,13 +174,14 @@ module AtomicLti
     end
 
     def update_lti_context(id_token:)
-      if id_token[AtomicLti::Definitions::CONTEXT_CLAIM].present? && id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['id'].present?
-        iss = id_token['iss']
+      if id_token[AtomicLti::Definitions::CONTEXT_CLAIM].present? &&
+          id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["id"].present?
+        iss = id_token["iss"]
         deployment_id = id_token[AtomicLti::Definitions::DEPLOYMENT_ID]
-        context_id = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['id']
-        label = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['label']
-        title = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['title']
-        types = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]['type']
+        context_id = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["id"]
+        label = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["label"]
+        title = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["title"]
+        types = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["type"]
 
         AtomicLti::Context.create_with(
           label: label,
@@ -187,7 +190,7 @@ module AtomicLti
         ).find_or_create_by!(
           iss: iss,
           deployment_id: deployment_id,
-          context_id: context_id
+          context_id: context_id,
         ).update!(
           label: label,
           title: title,
@@ -206,17 +209,16 @@ module AtomicLti
 
       Rails.logger.debug("Associating deployment: #{iss}/#{deployment_id} with client_id: iss: #{iss} / client_id: #{client_id} / platform_guid: #{platform_guid}")
 
-
-      AtomicLti::Deployment
-        .create_with(
+      AtomicLti::Deployment.
+        create_with(
           client_id: client_id,
-          platform_guid: platform_guid
+          platform_guid: platform_guid,
         ).find_or_create_by!(
           iss: iss,
-          deployment_id: deployment_id
+          deployment_id: deployment_id,
         ).update!(
           client_id: client_id,
-          platform_guid: platform_guid
+          platform_guid: platform_guid,
         )
     end
 
@@ -245,7 +247,7 @@ module AtomicLti
     def build_oidc_response(request, state, nonce, redirect_uri)
       platform = AtomicLti::Platform.find_by(iss: request.params["iss"])
       if !platform
-        raise AtomicLti::Exceptions::NoLTIPlatform, "No LTI Platform found for iss #{request.params["iss"]}"
+        raise AtomicLti::Exceptions::NoLTIPlatform(iss: request.params["iss"])
       end
 
       uri = URI.parse(platform.oidc_url)

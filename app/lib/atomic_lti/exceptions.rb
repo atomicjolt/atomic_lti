@@ -35,26 +35,29 @@ module AtomicLti
     class RateLimitError < AtomicLtiException
     end
 
+    class LtiConfigMissing < AtomicLtiException
+    end
+
     class InvalidLTIVersion < AtomicLtiException
-      def initialize(msg="Invalid LTI version")
+      def initialize(msg = "Invalid LTI version")
         super(msg)
       end
     end
 
     class NoLTIVersion < AtomicLtiException
-      def initialize(msg="No LTI Version provided")
+      def initialize(msg = "No LTI Version provided")
         super(msg)
       end
     end
 
     class NoLTIToken < AtomicLtiException
-      def initialize(msg="No LTI token provided")
+      def initialize(msg = "No LTI token provided")
         super(msg)
       end
     end
 
     class InvalidLTIToken < AtomicLtiException
-      def initialize(msg="Invalid LTI token provided")
+      def initialize(msg = "Invalid LTI token provided")
         super(msg)
       end
     end
@@ -65,21 +68,24 @@ module AtomicLti
 
     class NoLTIDeployment < AtomicLtiNotFoundException
       def initialize(iss:, deployment_id:)
-        msg="No LTI Deployment found for iss: #{iss} and deployment_id #{deployment_id}"
+        msg = "No LTI Deployment found for iss: #{iss} and deployment_id #{deployment_id}"
         super(msg)
       end
     end
 
     class NoLTIInstall < AtomicLtiNotFoundException
       def initialize(iss:, deployment_id:)
-        msg="No LTI Install found for iss: #{iss} and deployment_id #{deployment_id}"
+        msg = "No LTI Install found for iss: #{iss} and deployment_id #{deployment_id}"
         super(msg)
       end
     end
 
     class NoLTIPlatform < AtomicLtiNotFoundException
-      def initialize(iss:, deployment_id:)
-        msg="No LTI Platform associated with the LTI Install. iss: #{iss} and deployment_id #{deployment_id}"
+      def initialize(iss:, deployment_id: nil)
+        msg = "No LTI Platform associated with the LTI Install. iss: #{iss}"
+        if iss && deployment_id
+          msg = "No LTI Platform associated with the LTI Install. iss: #{iss} and deployment_id #{deployment_id}"
+        end
         super(msg)
       end
     end
