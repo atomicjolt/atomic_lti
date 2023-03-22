@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     atomic_lti (1.3.0)
-      pg (= 1.3.5)
-      rails (~> 7.0.3)
+      pg (>= 1.3)
+      rails (~> 7.0)
 
 GEM
   remote: https://rubygems.org/
@@ -145,8 +145,6 @@ GEM
     nokogiri (1.14.2)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
-    nokogiri (1.14.2-x86_64-linux)
-      racc (~> 1.4)
     octokit (6.0.1)
       faraday (>= 1, < 3)
       sawyer (~> 0.9)
@@ -253,7 +251,6 @@ GEM
       faraday (>= 0.17.3, < 3)
     sqlite3 (1.6.1)
       mini_portile2 (~> 2.8.0)
-    sqlite3 (1.6.1-x86_64-linux)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     thor (1.2.1)
