@@ -27,7 +27,7 @@ module AtomicLti
           tag: tag,
           startDateTime: start_date_time,
           endDateTime: end_date_time,
-        }
+        }.compact
         attrs["resourceLinkId"] = resource_link_id if resource_link_id
         if external_tool_url
           attrs[AtomicLti::Definitions::CANVAS_SUBMISSION_TYPE] = {
