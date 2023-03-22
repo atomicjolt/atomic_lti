@@ -16,6 +16,19 @@ module AtomicLti
         errors.push("LTI token is missing required field sub")
       end
 
+      if decoded_token["aud"].blank?
+        errors.push("LTI token is missing required field aud")
+      end
+
+      if decoded_token["aud"].is_a?(Array) && decoded_token["aud"].length > 1
+        # OpenID Connect spec specifies the AZP should exist and be an AUD
+        if decoded_token["azp"].blank?
+          errors.push("LTI token has multiple aud and is missing required field azp")
+        elsif decoded_token["aud"].exclude?(decoded_token["azp"])
+          errors.push("LTI token azp is not one of the aud's")
+        end
+      end
+
       if decoded_token[AtomicLti::Definitions::DEPLOYMENT_ID].blank?
         errors.push(
           "LTI token is missing required field #{AtomicLti::Definitions::DEPLOYMENT_ID}"
@@ -88,6 +101,18 @@ module AtomicLti
         decoded_token[AtomicLti::Definitions::LTI_VERSION].starts_with?("1.3")
       else
         false
+      end
+    end
+
+    def self.client_id(decoded_token)
+      if decoded_token["aud"]&.is_a?(Array)
+        if decoded_token["aud"].length > 1
+          decoded_token["azp"]
+        else
+          decoded_token["aud"][0]
+        end
+      else
+        decoded_token["aud"]
       end
     end
   end

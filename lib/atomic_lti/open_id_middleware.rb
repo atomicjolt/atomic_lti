@@ -159,7 +159,7 @@ module AtomicLti
     end
 
     def update_install(id_token:)
-      client_id = id_token["aud"]
+      client_id = AtomicLti::Lti.client_id(id_token)
       iss = id_token["iss"]
 
       if client_id.present? && iss.present?
@@ -202,7 +202,7 @@ module AtomicLti
     end
 
     def update_deployment(id_token:)
-      client_id = id_token["aud"]
+      client_id = AtomicLti::Lti.client_id(id_token)
       iss = id_token["iss"]
       deployment_id = id_token[AtomicLti::Definitions::DEPLOYMENT_ID]
       platform_guid = id_token.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "guid")
