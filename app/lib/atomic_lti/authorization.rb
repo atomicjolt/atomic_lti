@@ -16,7 +16,7 @@ module AtomicLti
 
       platform = Platform.find_by(iss: iss)
 
-      raise AtomicLti::Exceptions::NoLTIPlatform(iss: iss, deployment_id: decoded_token.dig(0, "deployment_id")) if platform.nil?
+      raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: decoded_token.dig(0, "deployment_id")) if platform.nil?
 
       cache_key = "#{iss}_jwks"
 

@@ -36,6 +36,15 @@ module AtomicLti
         status, _headers, _response = subject.call(req_env)
         expect(status).to eq(302)
       end
+
+      it "Throws an exception when the platform is invalid" do
+        setup_canvas_lti_advantage
+        req_env = Rack::MockRequest.env_for(
+          "https://test.atomicjolt.xyz/oidc/init",
+          { method: "POST", params: { "iss" => "badvalue" } },
+        )
+        expect { subject.call(req_env)}.to raise_error(AtomicLti::Exceptions::NoLTIPlatform)
+      end
     end
 
     describe "redirect" do
