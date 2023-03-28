@@ -247,7 +247,7 @@ module AtomicLti
     def build_oidc_response(request, state, nonce, redirect_uri)
       platform = AtomicLti::Platform.find_by(iss: request.params["iss"])
       if !platform
-        raise AtomicLti::Exceptions::NoLTIPlatform(iss: request.params["iss"])
+        raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: request.params["iss"])
       end
 
       uri = URI.parse(platform.oidc_url)

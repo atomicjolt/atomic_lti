@@ -78,7 +78,7 @@ module AtomicLti
         status, _headers, _response = middleware.call(env)
         expect(status).to eq(500)
       end
-      
+
       it "returns status 500 when an NamesAndRolesError is thrown" do
         app = ->(env) do
           raise AtomicLti::Exceptions::NamesAndRolesError.new
@@ -96,7 +96,7 @@ module AtomicLti
         status, _headers, _response = middleware.call(env)
         expect(status).to eq(500)
       end
-      
+
       it "returns status 500 when an StateError is thrown" do
         app = ->(env) do
           raise AtomicLti::Exceptions::StateError.new
