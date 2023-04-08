@@ -73,19 +73,26 @@ module AtomicLti
       sign_tool_jwt(payload)
     end
 
-    def self.request_token(iss:, deployment_id:)
+    def self.request_token(iss:, deployment_id:, scopes: nil)
       deployment = AtomicLti::Deployment.find_by(iss: iss, deployment_id: deployment_id)
 
       raise AtomicLti::Exceptions::NoLTIDeployment.new(iss: iss, deployment_id: deployment_id) if deployment.nil?
 
-      cache_key = "#{deployment.cache_key_with_version}/services_authorization"
+      scopestr = if scopes
+                   scopes.sort.join(" ")
+                 else
+                   AtomicLti.scopes
+                 end
+
+      # Token is cached based on deployment id and requested scopes
+      cache_key = "#{deployment.cache_key}/#{Digest::SHA1.hexdigest(scopestr)}/services_authorization"
       tries = 1
 
       begin
         authorization = Rails.cache.read(cache_key)
         return authorization if authorization.present?
 
-        authorization = request_token_uncached(iss: iss, deployment_id: deployment_id)
+        authorization = request_token_uncached(iss: iss, deployment_id: deployment_id, scopes: scopestr)
 
         # Subtract a few seconds so we don't use an expired token
         expires_in = authorization["expires_in"].to_i - 10
@@ -109,13 +116,13 @@ module AtomicLti
       authorization
     end
 
-    def self.request_token_uncached(iss:, deployment_id:)
+    def self.request_token_uncached(iss:, deployment_id:, scopes:)
       # Details here:
       # https://www.imsglobal.org/spec/security/v1p0/#using-json-web-tokens-with-oauth-2-0-client-credentials-grant
       body = {
         grant_type: "client_credentials",
         client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-        scope: AtomicLti.scopes,
+        scope: scopes,
         client_assertion: client_assertion(iss: iss, deployment_id: deployment_id),
       }
       headers = {

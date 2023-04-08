@@ -17,8 +17,10 @@ module AtomicLti
         @deployment_id = deployment_id || token_deployment_id
       end
 
+      def scopes; end
+
       def headers(options = {})
-        @token ||= AtomicLti::Authorization.request_token(iss: @iss, deployment_id: @deployment_id)
+        @token ||= AtomicLti::Authorization.request_token(iss: @iss, deployment_id: @deployment_id, scopes: scopes)
         {
           "Authorization" => "Bearer #{@token['access_token']}",
         }.merge(options)

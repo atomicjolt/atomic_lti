@@ -11,6 +11,14 @@ RSpec.describe AtomicLti::Services::LineItems do
   end
 
   describe "list" do
+    it "requests all scopres in the token" do
+      expect(AtomicLti::Authorization).to receive(:request_token).
+        with(hash_including({ scopes: match_array(@lti_token[AtomicLti::Definitions::AGS_CLAIM]["scope"]) })).
+        and_return("token")
+      stub_line_items_list
+      @line_item.list
+    end
+
     it "lists all line items in the course" do
       stub_line_items_list
       line_items = @line_item.list

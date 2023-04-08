@@ -10,6 +10,10 @@ module AtomicLti
         @id = id
       end
 
+      def scopes
+        [AtomicLti::Definitions::AGS_SCOPE_SCORE]
+      end
+
       def endpoint
         if id.blank?
           raise ::AtomicLti::Exceptions::ScoreError,

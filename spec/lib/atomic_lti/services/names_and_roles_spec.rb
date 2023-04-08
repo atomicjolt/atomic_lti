@@ -20,6 +20,14 @@ RSpec.describe AtomicLti::Services::NamesAndRoles do
       stub_names_and_roles_list
     end
 
+    it "requests only the names and roles scope" do
+      expect(AtomicLti::Authorization).to receive(:request_token).
+        with(hash_including({ scopes: [AtomicLti::Definitions::NAMES_AND_ROLES_SCOPE] })).
+        and_return("token")
+      names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(lti_token: @lti_token)
+      names_and_roles_service.list
+    end
+
     it "lists users in the course and their roles" do
       names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(lti_token: @lti_token)
       names_and_roles = JSON.parse(names_and_roles_service.list.body)

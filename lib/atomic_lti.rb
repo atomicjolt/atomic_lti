@@ -18,7 +18,7 @@ module AtomicLti
   mattr_accessor :target_link_path_prefixes
   mattr_accessor :default_deep_link_path
   mattr_accessor :jwt_secret
-  mattr_accessor :scopes
+  mattr_accessor :scopes, default: AtomicLti::Definitions.scopes.join(" ")
 
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
