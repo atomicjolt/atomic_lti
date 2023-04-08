@@ -62,7 +62,7 @@ module AtomicLti
       it "throws an exception when the deployment can't be found" do
         mocks = setup_canvas_lti_advantage
         expect {
-          Authorization.client_assertion(iss: mocks[:iss], deployment_id: 'bad_id')
+          Authorization.client_assertion(iss: mocks[:iss], deployment_id: "bad_id")
         }.to raise_error(AtomicLti::Exceptions::NoLTIDeployment)
       end
 
@@ -119,16 +119,16 @@ module AtomicLti
       it "caches based on scopes" do
         mocks = setup_canvas_lti_advantage
         stub_canvas_token
-        token1 = Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
-        token1 = Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope1", "scope2"])
+        Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope1", "scope2"])
         expect(WebMock).to have_requested(:post, AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL).twice
       end
 
       it "caches based on scopes without regard to order" do
         mocks = setup_canvas_lti_advantage
         stub_canvas_token
-        token1 = Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope2", "scope1"])
-        token1 = Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope1", "scope2"])
+        Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope2", "scope1"])
+        Authorization.request_token(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: ["scope1", "scope2"])
         expect(WebMock).to have_requested(:post, AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL).once
       end
 
@@ -144,7 +144,7 @@ module AtomicLti
       it "throws an exception when the deployment can't be found" do
         mocks = setup_canvas_lti_advantage
         expect {
-          Authorization.request_token(iss: mocks[:iss], deployment_id: 'bad_id')
+          Authorization.request_token(iss: mocks[:iss], deployment_id: "bad_id")
         }.to raise_error(AtomicLti::Exceptions::NoLTIDeployment)
       end
     end
@@ -153,7 +153,7 @@ module AtomicLti
       it "returns a token" do
         mocks = setup_canvas_lti_advantage
         stub_canvas_token
-        token = Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: 'scope1')
+        token = Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: "scope1")
         expect(token["expires_in"]).to be_present
       end
 
@@ -161,7 +161,7 @@ module AtomicLti
         mocks = setup_canvas_lti_advantage
         stub_canvas_token
         expect {
-          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: 'bad_id', scopes: 'scope1')
+          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: "bad_id", scopes: "scope1")
         }.to raise_error(AtomicLti::Exceptions::NoLTIDeployment)
       end
 
@@ -171,7 +171,7 @@ module AtomicLti
         deployment = AtomicLti::Deployment.find_by(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
         deployment.platform.destroy
         expect {
-          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: 'scope1')
+          Authorization.request_token_uncached(iss: mocks[:iss], deployment_id: mocks[:deployment_id], scopes: "scope1")
         }.to raise_error(AtomicLti::Exceptions::NoLTIPlatform)
       end
     end
