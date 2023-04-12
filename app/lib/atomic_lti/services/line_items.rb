@@ -6,7 +6,12 @@ module AtomicLti
       def endpoint(lti_token)
         url = lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "lineitems")
         raise AtomicLti::Exceptions::LineItemError, "Unable to access line items" unless url.present?
+
         url
+      end
+
+      def scopes
+        @lti_token&.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")
       end
 
       # Helper method to generate a default set of attributes

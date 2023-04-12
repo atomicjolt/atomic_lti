@@ -12,6 +12,13 @@ RSpec.describe AtomicLti::Services::Results do
   end
 
   describe "list" do
+    it "requests only the results scope" do
+      expect(AtomicLti::Authorization).to receive(:request_token).
+        with(hash_including({ scopes: [AtomicLti::Definitions::AGS_SCOPE_RESULT] })).
+        and_return("token")
+      stub_line_items_list
+      @results_service.list(@line_item_id)
+    end
     it "lists results for the specified line item" do
       stub_line_items_list
       results = JSON.parse(@results_service.list(@line_item_id).body)

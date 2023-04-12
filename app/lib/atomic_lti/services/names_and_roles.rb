@@ -6,6 +6,10 @@ module AtomicLti
         super(lti_token: lti_token)
       end
 
+      def scopes
+        [AtomicLti::Definitions::NAMES_AND_ROLES_SCOPE]
+      end
+
       def endpoint
         url = @lti_token.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "context_memberships_url")
         raise AtomicLti::Exceptions::NamesAndRolesError, "Unable to access names and roles" unless url.present?

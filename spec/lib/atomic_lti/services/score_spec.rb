@@ -11,6 +11,21 @@ RSpec.describe AtomicLti::Services::Score do
   end
 
   describe "send" do
+    it "requests only the score scope" do
+      expect(AtomicLti::Authorization).to receive(:request_token).
+        with(hash_including({ scopes: [AtomicLti::Definitions::AGS_SCOPE_SCORE] })).
+        and_return("token")
+      stub_scores_create
+      score = @score_service.generate(
+        user_id: "cfca15d8-2958-4647-a33e-a7c4b2ddab2c",
+        score: 10,
+        max_score: 10,
+        comment: "Great job",
+        activity_progress: "Completed",
+        grading_progress: "FullyGraded",
+      )
+      @score_service.send(score)
+    end
     it "sends a score for the specified line item" do
       stub_scores_create
       score = @score_service.generate(
