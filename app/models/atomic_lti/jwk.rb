@@ -3,9 +3,11 @@ module AtomicLti
     before_create :generate_keys
 
     def generate_keys
-      pkey = OpenSSL::PKey::RSA.generate(2048)
-      self.pem = pkey.to_pem
-      self.kid = pkey.to_jwk.thumbprint
+      if kid.blank?
+        pkey = OpenSSL::PKey::RSA.generate(2048)
+        self.pem = pkey.to_pem
+        self.kid = pkey.to_jwk.thumbprint
+      end
     end
 
     def alg
