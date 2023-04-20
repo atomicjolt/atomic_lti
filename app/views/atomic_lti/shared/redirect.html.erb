@@ -2,8 +2,12 @@
 <html lang="en">
   <head>
     <script type="text/javascript">
-      window.onload=function(){document.forms[0].submit();};
+      window.SETTINGS = <%= @settings.to_json.html_safe %>;
     </script>
+    <style>
+      .hidden { display: none; }
+    </style>
+    <%= javascript_include_tag "atomic_lti/redirect" %>
   </head>
   <body>
     <form action="<%= @launch_url -%>" method="POST">
@@ -11,5 +15,8 @@
         <%= hidden_field_tag(name, value) %>
       <% end -%>
     </form>
+    <div id="error" class="hidden">
+      There was an error launching the LTI tool. Please reload and try again.
+    </div>
   </body>
 </html>
