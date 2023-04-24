@@ -50,10 +50,10 @@ RSpec.describe AtomicLti::OpenId do
 
     it "allows the token to be missing when configured to not enforce csrf" do
       AtomicLti.enforce_csrf_protection = false
-      state = { "nonce" => "nonce", "state" => "state" }
       allow(AtomicLti::OpenIdState).to receive(:find_by).and_return(double("open_id_state", destroy: true))
 
       expect(described_class.validate_state("nonce", "state", "")).to eq(true)
+    ensure
       AtomicLti.enforce_csrf_protection = true
     end
 
@@ -64,6 +64,7 @@ RSpec.describe AtomicLti::OpenId do
       allow(AtomicLti::OpenIdState).to receive(:find_by).and_return(double("open_id_state", destroy: true))
 
       expect(described_class.validate_state("nonce", "state1", "token")).to eq(false)
+    ensure
       AtomicLti.enforce_csrf_protection = true
     end
   end

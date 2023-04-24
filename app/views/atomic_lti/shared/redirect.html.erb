@@ -8,6 +8,9 @@
       .hidden { display: none; }
     </style>
     <%= javascript_include_tag "atomic_lti/redirect" %>
+    <script type="text/javascript">
+      window.onload = async () => doLtiRedirect(window.SETTINGS);
+    </script>
   </head>
   <body>
     <form action="<%= @launch_url -%>" method="POST">

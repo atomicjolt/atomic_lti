@@ -73,7 +73,7 @@ function tryRequestStorageAccess(settings) {
     .then(() => {
       // We should have cookies now
       setCookie(settings);
-      document.location = settings.response_url;
+      window.location.replace(settings.response_url);
     })
     .catch((e) => {
       console.log(e);
@@ -103,20 +103,16 @@ function hasStorageAccessAPI() {
 }
 
 async function doLtiStorageLaunch(settings) {
-  let submitToPlatform = () => { document.location = settings.response_url };
+  let submitToPlatform = () => { window.location.replace(settings.response_url) };
 
   if (hasCookie(settings)) {
     // We have cookies
-    console.log("We have cookies");
     return submitToPlatform();
   }
 
   if (settings.lti_storage_params) {
     // We have lti postMessage storage
     try {
-      console.log(settings.state);
-      console.log(settings.csrf_token);
-
       await storeCsrf(settings.state, settings.csrf_token, settings.lti_storage_params);
       return submitToPlatform();
     } catch (e) {
@@ -144,4 +140,7 @@ async function doLtiStorageLaunch(settings) {
   }
 }
 
-window.onload = async () => doLtiStorageLaunch(window.SETTINGS);
+if (typeof module !== 'undefined') {
+  module.exports.doLtiStorageLaunch = doLtiStorageLaunch;
+  module.exports.tryRequestStorageAccess = tryRequestStorageAccess;
+}

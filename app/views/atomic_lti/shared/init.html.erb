@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <%= stylesheet_link_tag    "atomic_lti/launch" %>
     <%= javascript_include_tag "atomic_lti/init" %>
+    <script type="text/javascript">
+      window.onload = async () => doLtiStorageLaunch(window.SETTINGS);
+    </script>
   </head>
   <body>
     <div class="aj-main">
@@ -45,14 +48,14 @@
         </p>
       </div>
       <div id="request_storage_access" class="hidden">
-        <p class="aj-text aj-text--small">
+        <p class="aj-text aj-text">
         If you have used this application before, your browser may allow you to
           <a href="#" onclick="tryRequestStorageAccess(window.SETTINGS)">enable cookies</a>
           and prevent this message in the future.
         </p>
       </div>
       <div id="request_storage_access_error" class="hidden">
-        <p class="aj-text aj-text--small">
+        <p class="aj-text aj-text">
         The browser prevented access.  Try launching in a new window first and if that
         doesn't work check your privary settings. Some browsers will prevent all third party cookies.
         </p>

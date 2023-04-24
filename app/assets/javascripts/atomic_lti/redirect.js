@@ -77,4 +77,6 @@ async function doLtiRedirect(settings) {
   submitForm();
 }
 
-window.onload = async () => doLtiRedirect(window.SETTINGS);
+if (typeof module !== 'undefined') {
+  module.exports.doLtiRedirect = doLtiRedirect;
+}
