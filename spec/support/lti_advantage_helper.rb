@@ -75,20 +75,20 @@ def setup_canvas_lti_advantage(
     lti_user_id: lti_user_id,
     context_id: context_id,
     message_type: message_type,
-    resource_link_id: resource_link_id
+    resource_link_id: resource_link_id,
   )
 
   @nonce, @state, @csrf_token = AtomicLti::OpenId.generate_state
 
   @decoded_id_token = build_payload(
-      client_id: @client_id,
-      iss: @iss,
-      lti_user_id: @lti_user_id,
-      context_id: @context_id,
-      message_type: @message_type,
-      resource_link_id: @resource_link_id,
-      deployment_id: @deployment_id,
-      nonce: @nonce,
+    client_id: @client_id,
+    iss: @iss,
+    lti_user_id: @lti_user_id,
+    context_id: @context_id,
+    message_type: @message_type,
+    resource_link_id: @resource_link_id,
+    deployment_id: @deployment_id,
+    nonce: @nonce,
   ).deep_stringify_keys
 
   if block_given?

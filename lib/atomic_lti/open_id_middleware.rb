@@ -111,7 +111,6 @@ module AtomicLti
       )
 
       [200, { "Content-Type" => "text/html" }, [html]]
-
     rescue JWT::ExpiredSignature
       render_error(401, "The launch has expired. Please launch the application again.")
     rescue JWT::DecodeError
@@ -182,7 +181,6 @@ module AtomicLti
       env["atomic.validated.id_token"] = id_token
 
       @app.call(env)
-
     rescue JWT::ExpiredSignature
       render_error(401, "The launch has expired. Please launch the application again.")
     rescue JWT::DecodeError
@@ -330,7 +328,7 @@ module AtomicLti
       uri = URI.parse(request.url)
       uri.fragment = uri.query = nil
       params = request.params
-      params.delete("lti_storage_target");
+      params.delete("lti_storage_target")
       [uri.to_s, "?", params.to_query].join
     end
 
