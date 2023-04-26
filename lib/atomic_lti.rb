@@ -20,6 +20,19 @@ module AtomicLti
   mattr_accessor :jwt_secret
   mattr_accessor :scopes, default: AtomicLti::Definitions.scopes.join(" ")
 
+  # Set to true to enforce CSRF protection, either via cookies or postMessage
+  mattr_accessor :enforce_csrf_protection, default: true
+
+  # Set to true to use LTI postMessage storage for csrf token storage
+  # with this enabled we can operate without cookies
+  mattr_accessor :use_post_message_storage, default: true
+
+  # Set to true to set the targetOrigin on postMessage calls. The LTI spec
+  # requires this, but Canvas doesn't currently support it.
+  mattr_accessor :set_post_message_origin, default: false
+
+  mattr_accessor :privacy_policy_html, default: "We use cookies for login and statistics."
+
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
   end

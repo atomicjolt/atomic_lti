@@ -15,7 +15,7 @@ $ bundle
 
 Or install it yourself as:
 ```bash
-$ gem install atomic_tenant
+$ gem install atomic_lti
 ```
 
 Then install the migrations:
@@ -36,6 +36,12 @@ with the following contents. Adjust paths as needed.
   AtomicLti.default_deep_link_path = "/lti_launches"
   AtomicLti.jwt_secret = Rails.application.secrets.auth0_client_secret
   AtomicLti.scopes = AtomicLti::Definitions.scopes.join(" ")
+  ```
+
+## Building javascript
+Run esbuild:
+  ```
+  yarn build
   ```
 
 ## License

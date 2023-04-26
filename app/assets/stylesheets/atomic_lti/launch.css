@@ -1,0 +1,84 @@
+.aj-main {
+  position: relative;
+  width: 100%;
+  max-width: 60rem;
+  margin: 50px auto 0;
+}
+
+.aj-icon {
+  width: 2rem;
+}
+
+.aj-title {
+  font-family: 'Lato', 'Helvetica Nue', Helvetica, Arial sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1;
+  color: #333;
+  display: flex;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+}
+
+.aj-text.aj-text--small {
+  font-weight: 400;
+  font-size: 13px;
+  margin-top: 2rem;
+}
+
+.aj-text {
+  font-family: 'Lato', 'Helvetica Nue', Helvetica, Arial sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333;
+  max-width: 600px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+}
+
+.aj-btn--blue:hover, a.aj-btn--blue:hover {
+    box-shadow: 0rem 0.3rem 0.4rem rgba(0, 50, 150, 0.3);
+    background-color: #2D7DAE;
+}
+
+.aj-btn:hover, a.aj-btn:hover {
+    cursor: pointer;
+    background-color: #efefef;
+}
+
+.aj-btn.aj-btn--blue, a.aj-btn.aj-btn--blue {
+    font-family: "Lato", "Helvetica Nue", Helvetica, Arial sans-serif;
+    font-weight: 500;
+    background-color: #2D7DAE;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 2.7rem;
+    text-align: left;
+    color: #ffffff;
+    border-radius: none;
+    border: 0.2rem solid #2D7DAE;
+}
+
+.aj-btn, a.aj-btn {
+    height: 40px;
+    background-color: #f5f5f5;
+    border: 0.1rem solid #bbbbbb;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    border-radius: 5px;
+    white-space: nowrap;
+    position: relative;
+    isolation: isolate;
+    padding: 0 12px;
+    text-decoration: none;
+    font-family: "Lato", "Helvetica Nue", Helvetica, Arial sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #595959;
+}

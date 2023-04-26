@@ -14,7 +14,6 @@ development: &development
 
 test:
   adapter:  postgresql
-  host:     localhost
   encoding: unicode
   database: atomic_lti_test
   pool:     5

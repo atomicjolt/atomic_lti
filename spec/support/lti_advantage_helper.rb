@@ -75,17 +75,20 @@ def setup_canvas_lti_advantage(
     lti_user_id: lti_user_id,
     context_id: context_id,
     message_type: message_type,
-    resource_link_id: resource_link_id
+    resource_link_id: resource_link_id,
   )
 
+  @nonce, @state, @csrf_token = AtomicLti::OpenId.generate_state
+
   @decoded_id_token = build_payload(
-      client_id: @client_id,
-      iss: @iss,
-      lti_user_id: @lti_user_id,
-      context_id: @context_id,
-      message_type: @message_type,
-      resource_link_id: @resource_link_id,
-      deployment_id: @deployment_id,
+    client_id: @client_id,
+    iss: @iss,
+    lti_user_id: @lti_user_id,
+    context_id: @context_id,
+    message_type: @message_type,
+    resource_link_id: @resource_link_id,
+    deployment_id: @deployment_id,
+    nonce: @nonce,
   ).deep_stringify_keys
 
   if block_given?
@@ -102,17 +105,10 @@ def setup_canvas_lti_advantage(
     typ: "JWT",
   )
 
-  nonce = SecureRandom.hex(64)
-  AtomicLti::OpenIdState.create!(nonce: nonce)
-  @state = AtomicLti::AuthToken.issue_token(
-    {
-      nonce: nonce,
-    },
-  )
-
   @params = {
     "id_token" => @id_token,
     "state" => @state,
+    "csrf_token" => @csrf_token,
   }
 
   {
@@ -196,9 +192,8 @@ def deep_link_settings_claim
   }
 end
 
-def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, resource_link_id:, deployment_id:)
+def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, resource_link_id:, deployment_id:, nonce:)
   exp = 24.hours.from_now
-  nonce = SecureRandom.hex(10)
   payload = {
     "https://purl.imsglobal.org/spec/lti/claim/message_type": message_type,
     "https://purl.imsglobal.org/spec/lti/claim/version": "1.3.0",

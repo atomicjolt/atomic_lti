@@ -2,14 +2,25 @@
 <html lang="en">
   <head>
     <script type="text/javascript">
-      window.onload=function(){document.forms[0].submit();};
+      window.SETTINGS = <%= @settings.to_json.html_safe %>;
     </script>
+    <script type="text/javascript">
+      setTimeout(() => { document.getElementById('error').classList.remove('hidden'); }, 5000);
+    </script>
+    <style>
+      .hidden { display: none; }
+    </style>
+    <%= javascript_include_tag "atomic_lti/redirect_app" %>
   </head>
   <body>
+    <noscript> <p class="aj-text"> You must have javascript enabled to use this application. </p> </noscript>
     <form action="<%= @launch_url -%>" method="POST">
       <% @launch_params.each do |name, value| -%>
         <%= hidden_field_tag(name, value) %>
       <% end -%>
     </form>
+    <div id="error" class="hidden">
+      There was an error launching the LTI tool. Please reload and try again.
+    </div>
   </body>
 </html>
