@@ -1,13 +1,11 @@
 module AtomicLti
   class Jwk < ApplicationRecord
-    before_create :generate_keys
+    before_create :ensure_keys_exist
 
     def generate_keys
-      if kid.blank?
-        pkey = OpenSSL::PKey::RSA.generate(2048)
-        self.pem = pkey.to_pem
-        self.kid = pkey.to_jwk.thumbprint
-      end
+      pkey = OpenSSL::PKey::RSA.generate(2048)
+      self.pem = pkey.to_pem
+      self.kid = pkey.to_jwk.thumbprint
     end
 
     def alg
@@ -39,5 +37,14 @@ module AtomicLti
     def self.current_jwk
       self.last
     end
+
+    private
+
+    def ensure_keys_exist
+      if kid.blank?
+        generate_keys
+      end
+    end
+
   end
 end
