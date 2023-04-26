@@ -26,7 +26,7 @@ function loadCsrf(state, storage_params) {
     let timeout = setTimeout(() => {
       console.log("postMessage timeout");
       reject(new Error('Timeout while waiting for platform response'));
-    }, 5000);
+    }, 2000);
 
     let receiveMessage = (event) => {
       if (typeof event.data === "object" &&
@@ -58,7 +58,7 @@ function loadCsrf(state, storage_params) {
   });
 }
 
-async function doLtiRedirect(settings) {
+export async function doLtiRedirect(settings) {
   if (hasCookie(settings) || !settings.require_csrf) {
     return submitForm();
   }
@@ -75,8 +75,4 @@ async function doLtiRedirect(settings) {
     }
   }
   submitForm();
-}
-
-if (typeof module !== 'undefined') {
-  module.exports.doLtiRedirect = doLtiRedirect;
 }

@@ -1,8 +1,4 @@
-/**
- * @jest-environment jsdom
- */
-
-const init = require('./init');
+import { doLtiStorageLaunch, tryRequestStorageAccess } from "./init"
 
 const settings = {
   'state': 'state',
@@ -40,18 +36,18 @@ describe('test', () => {
     jest.spyOn(window.document, 'cookie', 'get').mockReturnValue('open_id_state=jwt');
     const mockReplace = jest.fn()
     jest.spyOn(window, 'location', 'get').mockReturnValue({ replace: mockReplace });
-    init.doLtiStorageLaunch(settings);
+    doLtiStorageLaunch(settings);
     expect(mockReplace).toHaveBeenCalledWith(settings.response_url);
   });
 
   test('shows cookie error when in top frame', () => {
-    init.doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     expect(document.getElementById('cookie_error').classList.contains('hidden')).toBe(false)
   });
 
   test('shows launch in new window when not in top frame', () => {
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
-    init.doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     expect(document.getElementById('cookie_error').classList.contains('hidden')).toBe(true)
     expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
   });
@@ -60,7 +56,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(false);
     document.requestStorageAccess = () => Promise.resolve(false);
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
-    init.doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     await new Promise(process.nextTick);
     expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(false)
     expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
@@ -70,7 +66,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(false);
     document.requestStorageAccess = () => Promise.resolve(false);
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
-    init.doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     await new Promise(process.nextTick);
     expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(false)
     expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
@@ -81,7 +77,7 @@ describe('test', () => {
     const mockReplace = jest.fn()
     jest.spyOn(window, 'location', 'get').mockReturnValue({ replace: mockReplace });
     const cookieSet = jest.spyOn(document, 'cookie', 'set');
-    init.tryRequestStorageAccess(settings);
+    tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
     expect(mockReplace).toHaveBeenCalledWith(settings.response_url);
     expect(cookieSet).toHaveBeenCalledWith('open_id_state=csrf; path=/; max-age=300; SameSite=None ;');
@@ -90,7 +86,7 @@ describe('test', () => {
   test('shows an error if storage access is not granted', async () => {
     const logSpy = jest.spyOn(console, 'log').mockReturnValue(null);
     document.requestStorageAccess = () => new Promise(function() { throw new Error('No Access'); });
-    init.tryRequestStorageAccess(settings);
+    tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
     expect(document.getElementById('request_storage_access_error').classList.contains('hidden')).toBe(false)
     expect(logSpy).toHaveBeenCalled();
@@ -98,7 +94,7 @@ describe('test', () => {
 
   test('uses the lti storage api when available', async () => {
     const postMessageSpy = jest.spyOn(window, 'postMessage')
-    init.doLtiStorageLaunch(settings);
+    doLtiStorageLaunch(settings);
     await new Promise(process.nextTick);
     expect(postMessageSpy).toHaveBeenCalled();
     // TODO: Figure out how to test the postMessage API

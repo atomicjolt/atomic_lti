@@ -6,7 +6,9 @@
   "author": "Matt Petro <matt.petro@atomicjolt.com>",
   "license": "MIT",
   "scripts": {
-    "test": "jest --config package.json"
+    "test": "jest --config package.json",
+    "build": "yarn run build_packs",
+    "build_packs": "node esbuild.mjs"
   },
   "jest": {
     "roots": [
@@ -14,11 +16,13 @@
     ],
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
-    }
+    },
+    "testEnvironment": "jsdom"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.4",
     "babel-jest": "^29.5.0",
+    "esbuild": "^0.17.18",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0"
   }

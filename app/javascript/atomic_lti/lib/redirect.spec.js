@@ -1,8 +1,4 @@
-/**
- * @jest-environment jsdom
- */
-
-const redirect = require('./redirect');
+import { doLtiRedirect } from "./redirect"
 
 const settings = {
   'state': 'state',
@@ -36,20 +32,20 @@ describe('test', () => {
     jest.spyOn(window.document, 'cookie', 'get').mockReturnValue('open_id_state=jwt');
     const mockSubmit = jest.fn()
     document.forms[0].submit = mockSubmit;
-    redirect.doLtiRedirect(settings);
+    doLtiRedirect(settings);
     expect(mockSubmit).toHaveBeenCalled();
   });
 
   test('submits form when cookie is not present and lti storage isn\'t available', () => {
     const mockSubmit = jest.fn()
     document.forms[0].submit = mockSubmit;
-    redirect.doLtiRedirect({ ...settings, lti_storage_params: null });
+    doLtiRedirect({ ...settings, lti_storage_params: null });
     expect(mockSubmit).toHaveBeenCalled();
   });
 
   test('uses the lti storage api when available', async () => {
     const postMessageSpy = jest.spyOn(window, 'postMessage')
-    redirect.doLtiRedirect(settings);
+    doLtiRedirect(settings);
     await new Promise(process.nextTick);
     expect(postMessageSpy).toHaveBeenCalled();
     // TODO: Figure out how to test the postMessage API

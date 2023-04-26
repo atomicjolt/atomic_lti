@@ -56,7 +56,7 @@ module AtomicLti
           # values will require no action. Possible values are NotReady, Failed, Pending,
           # PendingManual, FullyGraded
           gradingProgress: grading_progress,
-        }
+        }.compact
       end
 
       def send(attrs)

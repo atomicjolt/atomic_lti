@@ -68,7 +68,7 @@ function storeCsrf(state, csrf_token, storage_params) {
   });
 }
 
-function tryRequestStorageAccess(settings) {
+export function tryRequestStorageAccess(settings) {
   document.requestStorageAccess()
     .then(() => {
       // We should have cookies now
@@ -102,7 +102,7 @@ function hasStorageAccessAPI() {
     && typeof document.requestStorageAccess === 'function';
 }
 
-async function doLtiStorageLaunch(settings) {
+export async function doLtiStorageLaunch(settings) {
   let submitToPlatform = () => { window.location.replace(settings.response_url) };
 
   if (hasCookie(settings)) {
@@ -138,9 +138,4 @@ async function doLtiStorageLaunch(settings) {
   } else {
     showCookieError();
   }
-}
-
-if (typeof module !== 'undefined') {
-  module.exports.doLtiStorageLaunch = doLtiStorageLaunch;
-  module.exports.tryRequestStorageAccess = tryRequestStorageAccess;
 }
