@@ -16,6 +16,14 @@ function showRequestStorageAccess() {
 
 function showRequestStorageError() {
   document.getElementById('request_storage_access_error').classList.remove('hidden');
+  document.getElementById('request_storage_access').classList.add('hidden');
+}
+
+export function launchNewWindow(settings) {
+  window.open(settings.relaunch_init_url);
+  document.getElementById('button_launch_new_window').disabled = true;
+  document.getElementById('request_storage_access').classList.add('hidden');
+  document.getElementById('request_storage_access_error').classList.add('hidden');
 }
 
 function storeCsrf(state, csrf_token, storage_params) {
