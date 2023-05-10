@@ -13,7 +13,7 @@ function showError() {
 }
 
 function privacyHtml(settings) {
-  return i18next.t(settings.privacy_policy_message || `We use cookies for login and security`) + ' '
+  return i18next.t(settings.privacy_policy_message || `We use cookies for login and security.`) + ' '
     + i18next.t(`Learn more in our <a href='{{url}}' target='_blank'>privacy policy</a>.`);
 }
 
