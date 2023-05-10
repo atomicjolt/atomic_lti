@@ -1,4 +1,11 @@
+import i18next from "i18next";
 import { doLtiStorageLaunch, tryRequestStorageAccess, launchNewWindow } from "./init"
+
+i18next
+  .init({
+    fallbackLng: 'en',
+    keySeparator: false,
+  });
 
 const settings = {
   'state': 'state',
@@ -18,11 +25,7 @@ describe('test', () => {
     document.body.innerHTML = `
       <div class="aj-main">
         <div id="error" class="hidden error">Error</div>
-        <div id="launch_new_window" class="hidden">Launch new window</div>
-        <div id="cookie_error" class="hidden">Cookie error</div>
-        <button id="button_launch_new_window">Launch in new window</button>
-        <div id="request_storage_access" class="hidden">Request storage access</div>
-        <div id="request_storage_access_error" class="hidden">Request storage access error</div>
+        <div id="main-content"></div>
       </div>
     `;
   });
@@ -39,7 +42,8 @@ describe('test', () => {
     launchNewWindow(settings);
     expect(openSpy).toHaveBeenCalledWith(settings.relaunch_init_url);
     expect(document.getElementById('button_launch_new_window').disabled).toBe(true);
-    expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(true);
+    expect(document.body.innerHTML).toContain("Please click");
+    expect(document.body.innerHTML).not.toContain("enable cookies");
   });
 
   test('submits form when we have cookies', () => {
@@ -52,14 +56,14 @@ describe('test', () => {
 
   test('shows cookie error when in top frame', () => {
     doLtiStorageLaunch({ ...settings, lti_storage_params: null });
-    expect(document.getElementById('cookie_error').classList.contains('hidden')).toBe(false)
+    expect(document.body.innerHTML).toContain("check your browser");
+    expect(document.body.innerHTML).not.toContain("Open in a new window");
   });
 
   test('shows launch in new window when not in top frame', () => {
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
     doLtiStorageLaunch({ ...settings, lti_storage_params: null });
-    expect(document.getElementById('cookie_error').classList.contains('hidden')).toBe(true)
-    expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
+    expect(document.body.innerHTML).toContain("Open in a new window");
   });
 
   test('shows storage api access link when available and not in top frame', async () => {
@@ -68,18 +72,25 @@ describe('test', () => {
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
     doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     await new Promise(process.nextTick);
-    expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(false)
-    expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
+    expect(document.body.innerHTML).toContain("enable cookies");
   });
 
   test('doesn\'t show storage api access link when not available', async () => {
-    document.hasStorageAccess = () => Promise.resolve(false);
-    document.requestStorageAccess = () => Promise.resolve(false);
+    document.hasStorageAccess = () => Promise.reject();
+    document.requestStorageAccess = () => Promise.resolve(true);
     jest.spyOn(window, 'top', 'get').mockReturnValue({});
     doLtiStorageLaunch({ ...settings, lti_storage_params: null });
     await new Promise(process.nextTick);
-    expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(false)
-    expect(document.getElementById('launch_new_window').classList.contains('hidden')).toBe(false)
+    expect(document.body.innerHTML).not.toContain("enable cookies");
+  });
+
+  test('doesn\'t show storage api access link when we already have access', async () => {
+    document.hasStorageAccess = () => Promise.resolve(true);
+    document.requestStorageAccess = () => Promise.resolve(true);
+    jest.spyOn(window, 'top', 'get').mockReturnValue({});
+    doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await new Promise(process.nextTick);
+    expect(document.body.innerHTML).not.toContain("enable cookies");
   });
 
   test('redirects and sets cookie if storage access is granted', async () => {
@@ -98,7 +109,7 @@ describe('test', () => {
     document.requestStorageAccess = () => new Promise(function() { throw new Error('No Access'); });
     tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
-    expect(document.getElementById('request_storage_access_error').classList.contains('hidden')).toBe(false)
+    expect(document.body.innerHTML).toContain("browser prevented");
     expect(logSpy).toHaveBeenCalled();
   });
 

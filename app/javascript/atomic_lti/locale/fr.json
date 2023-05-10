@@ -1,0 +1,11 @@
+{
+  "Cookies Required": "Cookies nécessaires",
+  "There was an error launching the LTI tool. Please reload and try again.": "Une erreur s'est produite lors du lancement de l'outil LTI. Veuillez recharger et réessayer.",
+  "Please click the button below to reload in a new window.": "Veuillez cliquer sur le bouton ci-dessous pour recharger dans une nouvelle fenêtre.",
+  "Open in a new window": "Ouvrir dans une nouvelle fenêtre",
+  "If you have used this application before, your browser may allow you to <a id='request_storage_access_link' href='#'>enable cookies</a> and prevent this message in the future.": "Si vous avez déjà utilisé cette application, votre navigateur peut vous permettre d'<a id='request_storage_access_link' href='#'>activer les cookies</a> et empêcher ce message à l'avenir.",
+  "The browser prevented access.  Try launching in a new window first and then clicking this option again next time. If that doesn't work check your privacy settings. Some browsers will prevent all third party cookies.": "Le navigateur a empêché l'accès. Essayez d'abord de lancer dans une nouvelle fenêtre, puis cliquez à nouveau sur cette option la prochaine fois. Si cela ne fonctionne pas, vérifiez vos paramètres de confidentialité. Certains navigateurs empêcheront tous les cookies tiers.",
+  "We use cookies for login and security.": "Nous utilisons des cookies pour la connexion et la sécurité.",
+  "Learn more in our <a href='{{url}}' target='_blank'>privacy policy</a>.": "En savoir plus dans notre <a href='{{url}}' target='_blank'>politique de confidentialité</a>.",
+  "Please check your browser settings and enable cookies.": "Veuillez vérifier les paramètres de votre navigateur et activer les cookies."
+}
