@@ -96,6 +96,8 @@ module AtomicLti
                       csrf_token: "csrf",
                       response_url: start_with("https://canvas.instructure.com/api/lti/authorize_redirect"),
                       lti_storage_params: nil,
+                      privacy_policy_url: "#",
+                      privacy_policy_message: nil,
                       relaunch_init_url: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
                     },
                   },
