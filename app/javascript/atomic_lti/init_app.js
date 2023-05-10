@@ -7,7 +7,6 @@ import fr from "./locale/fr.json"
 i18next
   .use(LanguageDetector)
   .init({
-    debug: true,
     detection: { order: ['querystring', 'navigator'] },
     fallbackLng: 'en',
     keySeparator: false,
