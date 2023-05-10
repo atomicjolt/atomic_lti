@@ -1,9 +1,10 @@
-import { doLtiStorageLaunch, tryRequestStorageAccess } from "./init"
+import { doLtiStorageLaunch, tryRequestStorageAccess, launchNewWindow } from "./init"
 
 const settings = {
   'state': 'state',
   'csrf_token': 'csrf',
   'response_url': 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
+  'relaunch_init_url': 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
   'lti_storage_params': {
     'target': '_parent',
     'origin_support_broken': true,
@@ -19,6 +20,7 @@ describe('test', () => {
         <div id="error" class="hidden error">Error</div>
         <div id="launch_new_window" class="hidden">Launch new window</div>
         <div id="cookie_error" class="hidden">Cookie error</div>
+        <button id="button_launch_new_window">Launch in new window</button>
         <div id="request_storage_access" class="hidden">Request storage access</div>
         <div id="request_storage_access_error" class="hidden">Request storage access error</div>
       </div>
@@ -30,6 +32,14 @@ describe('test', () => {
     delete document.hasStorageAccess;
     delete document.requestStorageAccess;
     document.cookie = 'open_id_state=;Max-Age=-1';
+  });
+
+  test('launches in new window', () => {
+    const openSpy = jest.spyOn(window, 'open');
+    launchNewWindow(settings);
+    expect(openSpy).toHaveBeenCalledWith(settings.relaunch_init_url);
+    expect(document.getElementById('button_launch_new_window').disabled).toBe(true);
+    expect(document.getElementById('request_storage_access').classList.contains('hidden')).toBe(true);
   });
 
   test('submits form when we have cookies', () => {
