@@ -83,21 +83,6 @@ module AtomicLti
           expect(status).to eq(200)
           expect(renderer).to have_received(:render).with(:html, hash_including({ template: "atomic_lti/shared/init" }))
         end
-        it "passes relaunch url" do
-          _status, _headers, _response = subject.call(req_env)
-          expect(renderer).to have_received(:render).with(
-            :html,
-            hash_including(
-              {
-                assigns: hash_including(
-                  {
-                    relaunch_init_url: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
-                  },
-                ),
-              },
-            ),
-          )
-        end
         it "passes settings" do
           _status, _headers, _response = subject.call(req_env)
           expect(renderer).to have_received(:render).with(
@@ -111,6 +96,7 @@ module AtomicLti
                       csrf_token: "csrf",
                       response_url: start_with("https://canvas.instructure.com/api/lti/authorize_redirect"),
                       lti_storage_params: nil,
+                      relaunch_init_url: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
                     },
                   },
                 ),
