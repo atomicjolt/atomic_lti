@@ -1,21 +1,86 @@
+import i18next from "i18next";
+
 function showError() {
-  document.getElementById('error').classList.remove('hidden');
+  const container = document.getElementById('main-content');
+  container.innerHTML = `
+    <div class="u-flex aj-centered-message">
+      <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+      <p class="aj-text translate">
+        ${ i18next.t("There was an error launching the LTI tool. Please reload and try again.") }
+      </p>
+    </div>
+  `;
 }
 
-function showLaunchNewWindow() {
-  document.getElementById('launch_new_window').classList.remove('hidden');
+function privacyHtml(settings) {
+  return i18next.t(settings.privacy_policy_message || `We use cookies for login and security.`) + ' '
+    + i18next.t(`Learn more in our <a href='{{url}}' target='_blank'>privacy policy</a>.`);
 }
 
-function showCookieError() {
-  document.getElementById('cookie_error').classList.remove('hidden');
+
+function showLaunchNewWindow(settings, options) {
+  const { disableLaunch, showRequestStorageAccess, showStorageAccessDenied } = options;
+  const container = document.getElementById('main-content');
+  container.innerHTML = `
+    <div class="aj-centered-message">
+      <h1 class="aj-title">
+        <i class="material-icons-outlined aj-icon" aria-hidden="true">cookie_off</i>
+        ${ i18next.t("Cookies Required") }
+      </h1>
+      <p class="aj-text">
+        ${ privacyHtml(settings) } </p>
+      <p class="aj-text">
+        ${ i18next.t('Please click the button below to reload in a new window.') }
+      </p>
+      <button id="button_launch_new_window" class="aj-btn aj-btn--blue" ${ disableLaunch? 'disabled=""' : '' } >
+        ${ i18next.t('Open in a new window') }
+      </button>
+      </a>
+      ${ showRequestStorageAccess? `
+        <div id="request_storage_access">
+          <p class="aj-text">
+            ${ i18next.t("If you have used this application before, your browser may allow you to <a id='request_storage_access_link' href='#'>enable cookies</a> and prevent this message in the future.") }
+          </p>
+        </div>
+       `:''}
+      ${ showStorageAccessDenied? `
+      <div id="request_storage_access_error" class="u-flex">
+        <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+        <p class="aj-text">
+        ${ i18next.t('The browser prevented access.  Try launching in a new window first and then clicking this option again next time. If that doesn\'t work check your privacy settings. Some browsers will prevent all third party cookies.') }
+        </p>
+      </div>
+      `:''}
+    </div>
+  `;
+  document.getElementById("button_launch_new_window").onclick = () => launchNewWindow(window.SETTINGS);
+  if (showRequestStorageAccess) {
+    document.getElementById("request_storage_access_link").
+      onclick = () => tryRequestStorageAccess(window.SETTINGS);
+  }
 }
 
-function showRequestStorageAccess() {
-  document.getElementById('request_storage_access').classList.remove('hidden');
+function showCookieError(settings) {
+  const container = document.getElementById('main-content');
+  container.innerHTML = `
+    <div id="cookie_error" class="aj-centered-message">
+      <h1 class="aj-title">
+        <i class="material-icons-outlined aj-icon" aria-hidden="true">cookie_off</i>
+        ${ i18next.t("Cookies Required") }
+      </h1>
+      <p class="aj-text">
+        ${ privacyHtml(settings) }
+      </p>
+      <p class="aj-text">
+        ${ i18next.t("Please check your browser settings and enable cookies.") }
+      </p>
+    </div>
+  `;
 }
 
-function showRequestStorageError() {
-  document.getElementById('request_storage_access_error').classList.remove('hidden');
+export function launchNewWindow(settings) {
+  window.open(settings.relaunch_init_url);
+  showLaunchNewWindow(settings, { disableLaunch: true });
 }
 
 function storeCsrf(state, csrf_token, storage_params) {
@@ -77,7 +142,7 @@ export function tryRequestStorageAccess(settings) {
     })
     .catch((e) => {
       console.log(e);
-      showRequestStorageError();
+      showLaunchNewWindow(settings, { showStorageAccessDenied: true });
     });
 }
 
@@ -121,21 +186,21 @@ export async function doLtiStorageLaunch(settings) {
   }
 
   if (window.self !== window.top) {
-    showLaunchNewWindow();
+    let showRequestStorageAccess = false;
     if (hasStorageAccessAPI()) {
       // We have storage access API, which will work for Safari as long as the
       // user already has used the application in the top layer and it set a cookie.
       try {
         let hasAccess = await document.hasStorageAccess();
         if (!hasAccess) {
-          showRequestStorageAccess();
-          return;
+          showRequestStorageAccess = true;
         }
       } catch(e) {
         console.log(e);
       }
     }
+    showLaunchNewWindow(settings, { showRequestStorageAccess });
   } else {
-    showCookieError();
+    showCookieError(settings);
   }
 }

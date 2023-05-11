@@ -53,13 +53,14 @@ module AtomicLti
           layout: false,
           template: "atomic_lti/shared/init",
           assigns: {
-            relaunch_init_url: relaunch_init_url(request),
-            privacy_policy_html: AtomicLti.privacy_policy_html,
             settings: {
               state: state,
               csrf_token: csrf_token,
               response_url: response_url,
               lti_storage_params: lti_storage_params,
+              relaunch_init_url: relaunch_init_url(request),
+              privacy_policy_url: AtomicLti.privacy_policy_url,
+              privacy_policy_message: AtomicLti.privacy_policy_message,
             },
           },
         )

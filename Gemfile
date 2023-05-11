@@ -25,9 +25,9 @@ group :test do
   gem "rspec"
   gem "rspec-rails"
 
-  gem "jwt", "2.3.0"
-  gem "json-jwt", "1.13.0"
-  gem "httparty", "0.21.0"
+  gem "jwt", "~>2.7.0"
+  gem "json-jwt"
+  gem "httparty"
 end
 
 group :ci do

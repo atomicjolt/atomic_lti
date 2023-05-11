@@ -8,19 +8,32 @@
       setTimeout(() => { document.getElementById('error').classList.remove('hidden'); }, 5000);
     </script>
     <style>
-      .hidden { display: none; }
+      .hidden { display: none !important; }
     </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <%= stylesheet_link_tag    "atomic_lti/launch" %>
     <%= javascript_include_tag "atomic_lti/redirect_app" %>
   </head>
   <body>
-    <noscript> <p class="aj-text"> You must have javascript enabled to use this application. </p> </noscript>
-    <form action="<%= @launch_url -%>" method="POST">
-      <% @launch_params.each do |name, value| -%>
-        <%= hidden_field_tag(name, value) %>
-      <% end -%>
-    </form>
-    <div id="error" class="hidden">
-      There was an error launching the LTI tool. Please reload and try again.
+      <noscript>
+        <div class="u-flex aj-centered-message">
+          <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+          <p class="aj-text">
+            You must have javascript enabled to use this application.
+          </p> 
+        </div>
+      </noscript>
+      <form action="<%= @launch_url -%>" method="POST">
+        <% @launch_params.each do |name, value| -%>
+          <%= hidden_field_tag(name, value) %>
+        <% end -%>
+      </form>
+      <div id="error" class="hidden u-flex aj-centered-message">
+        <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+        <p class="aj-text">
+          There was an error launching the LTI tool. Please reload and try again.
+        </p>
+      </div>
     </div>
   </body>
 </html>

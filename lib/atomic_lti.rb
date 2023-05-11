@@ -31,7 +31,8 @@ module AtomicLti
   # requires this, but Canvas doesn't currently support it.
   mattr_accessor :set_post_message_origin, default: false
 
-  mattr_accessor :privacy_policy_html, default: "We use cookies for login and statistics."
+  mattr_accessor :privacy_policy_url, default: "#"
+  mattr_accessor :privacy_policy_message, default: nil
 
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)

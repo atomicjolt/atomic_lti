@@ -8,59 +8,28 @@
       setTimeout(() => { if (!window.LAUNCHED) document.getElementById('error').classList.remove('hidden'); }, 5000);
     </script>
     <style>
-      .hidden { display: none; }
+      .hidden { display: none !important; }
     </style> 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <%= stylesheet_link_tag    "atomic_lti/launch" %>
     <%= javascript_include_tag "atomic_lti/init_app" %>
   </head>
   <body>
-    <div class="aj-main">
-      <noscript> <p class="aj-text"> You must have javascript enabled to use this application. </p> </noscript>
-      <div id="error" class="hidden error">
-        There was an error while launching the application. Please reload and try again.
-      </div>
-      <div id="launch_new_window" class="hidden aj-main__center">
-        <h1 class="aj-title">
-          <i class="material-icons-outlined aj-icon" aria-hidden="true">cookie_off</i>
-          Cookies required
-        </h1>
+    <noscript>
+      <div class="u-flex">
+        <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
         <p class="aj-text">
-          <%= @privacy_policy_html.html_safe %>
-        </p>
-        <p class="aj-text">
-          Please click the button below to reload in a new window.
-        </p>
-        <button class="aj-btn aj-btn--blue" onclick="window.open('<%= @relaunch_init_url %>');">
-          Open in a new window
-        </button>
-        </a>
+          You must have javascript enabled to use this application.
+        </p> 
       </div>
-      <div id="cookie_error" class="hidden error">
-        <h1 class="aj-title">
-          <i class="material-icons-outlined aj-icon" aria-hidden="true">cookie_off</i>
-          Cookies required
-        </h1>
-        <p class="aj-text">
-          <%= @privacy_policy_html.html_safe %>
-        </p>
-        <p class="aj-text">
-          Please check your browser settings and enable cookies.
-        </p>
-      </div>
-      <div id="request_storage_access" class="hidden">
-        <p class="aj-text aj-text">
-        If you have used this application before, your browser may allow you to
-          <a id="request_storage_access_link" href="#">enable cookies</a>
-          and prevent this message in the future.
-        </p>
-      </div>
-      <div id="request_storage_access_error" class="hidden">
-        <p class="aj-text aj-text">
-        The browser prevented access.  Try launching in a new window first and if that
-        doesn't work check your privary settings. Some browsers will prevent all third party cookies.
-        </p>
-      </div>
+    </noscript>
+    <div id="error" class="hidden u-flex aj-centered-message">
+      <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+      <p class="aj-text translate">
+        There was an error launching the LTI tool. Please reload and try again.
+      </p>
+    </div>
+    <div id="main-content">
     </div>
   </body>
 </html>
