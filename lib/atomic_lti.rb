@@ -34,6 +34,8 @@ module AtomicLti
   mattr_accessor :privacy_policy_url, default: "#"
   mattr_accessor :privacy_policy_message, default: nil
 
+  mattr_accessor :allow_non_logged_in_user, default: false
+
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
   end
