@@ -34,6 +34,12 @@ module AtomicLti
   mattr_accessor :privacy_policy_url, default: "#"
   mattr_accessor :privacy_policy_message, default: nil
 
+  # https://www.imsglobal.org/spec/lti/v1p3#anonymous-launch-case
+  # 'anonymous' here means that the launch does not include a 'sub' field. In
+  # Canvas, this means the user is not logged in at all. If you enable this
+  # option, you will likely have to adjust application code to accommodate
+  mattr_accessor :allow_anonymous_user, default: false
+
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
   end

@@ -12,7 +12,7 @@ module AtomicLti
         errors.push("LTI token is missing required field iss")
       end
 
-      if decoded_token["sub"].blank?
+      if decoded_token["sub"].blank? && !AtomicLti.allow_anonymous_user
         errors.push("LTI token is missing required field sub")
       end
 
