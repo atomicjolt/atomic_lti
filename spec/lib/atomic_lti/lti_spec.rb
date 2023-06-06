@@ -80,6 +80,37 @@ module AtomicLti
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
+      it "throws an exception if the roles claim only contains invalid roles" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = ["invalid_role"]
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token])
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "handles roles with invalid members" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = [
+            "invalid_role",
+            AtomicLti::Definitions::LEARNER_CONTEXT_ROLE
+          ]
+          { decoded_id_token: decoded_id_token }
+        end
+        valid = Lti.validate!(mocks[:decoded_id_token])
+        expect(valid).to eq(true)
+      end
+
+      it "handles no provided roles" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = []
+          { decoded_id_token: decoded_id_token }
+        end
+        valid = Lti.validate!(mocks[:decoded_id_token])
+        expect(valid).to eq(true)
+      end
+
       it "throws an exception if the User (sub) claim is missing" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token.delete("sub")

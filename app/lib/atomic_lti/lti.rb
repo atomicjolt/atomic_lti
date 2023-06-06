@@ -45,10 +45,18 @@ module AtomicLti
         errors.concat(validate_resource_link_request(decoded_token, requested_target_link_uri, validate_target_link_url))
       end
 
-      if decoded_token[AtomicLti::Definitions::ROLES_CLAIM].blank?
+      if decoded_token[AtomicLti::Definitions::ROLES_CLAIM].nil?
         errors.push(
           "LTI token is missing required claim #{AtomicLti::Definitions::ROLES_CLAIM}"
         )
+      end
+
+      roles = decoded_token[AtomicLti::Definitions::ROLES_CLAIM]
+      if roles.is_a?(Array) && !roles.empty?
+        invalid_roles = roles - AtomicLti::Definitions::ROLES
+        if invalid_roles.length == roles.length
+          errors.push("LTI token has invalid roles: #{invalid_roles.join(", ")}")
+        end
       end
 
       if errors.length > 0
@@ -69,7 +77,7 @@ module AtomicLti
 
       if decoded_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM].blank?
         errors.push(
-          "LTI token is missing required claim #{AtomicLti::Definitions::TARGET_LINK_URI_CLAIM}"
+          "LTI token is missing required claim #{AtomicLti::Definitions::TARGET_LINK_URI_CLAIM}",
         )
       end
 
@@ -77,19 +85,19 @@ module AtomicLti
       target_link_uri = decoded_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
       if validate_target_link_url && target_link_uri != requested_target_link_uri
         errors.push(
-          "LTI token target link uri '#{target_link_uri}' doesn't match url '#{requested_target_link_uri}'"
+          "LTI token target link uri '#{target_link_uri}' doesn't match url '#{requested_target_link_uri}'",
         )
       end
 
       if decoded_token[AtomicLti::Definitions::RESOURCE_LINK_CLAIM].blank?
         errors.push(
-          "LTI token is missing required claim #{AtomicLti::Definitions::RESOURCE_LINK_CLAIM}"
+          "LTI token is missing required claim #{AtomicLti::Definitions::RESOURCE_LINK_CLAIM}",
         )
       end
 
       if decoded_token.dig(AtomicLti::Definitions::RESOURCE_LINK_CLAIM, "id").blank?
         errors.push(
-          "LTI token is missing required field id from the claim #{AtomicLti::Definitions::RESOURCE_LINK_CLAIM}"
+          "LTI token is missing required field id from the claim #{AtomicLti::Definitions::RESOURCE_LINK_CLAIM}",
         )
       end
 
