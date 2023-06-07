@@ -26,7 +26,13 @@ module AtomicLti
       end
 
       if decoded_token[AtomicLti::Definitions::MESSAGE_TYPE] === "LtiResourceLinkRequest"
-        errors.concat(validate_resource_link_request(decoded_token, requested_target_link_uri, validate_target_link_url))
+        errors.concat(
+          validate_resource_link_request(
+            decoded_token,
+            requested_target_link_uri,
+            validate_target_link_url,
+          ),
+        )
       end
 
       if !errors.empty?
