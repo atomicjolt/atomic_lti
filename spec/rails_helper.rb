@@ -10,6 +10,7 @@ require "webmock/rspec"
 require "factories/_common"
 require "support/lti_advantage_helper"
 require "support/http_mocks"
+require "support/config_helpers"
 
 # Add additional requires below this line. Rails is not loaded until this point!
 
