@@ -45,7 +45,7 @@ module AtomicLti
         errors.concat(validate_resource_link_request(decoded_token, requested_target_link_uri, validate_target_link_url))
       end
 
-      if decoded_token[AtomicLti::Definitions::ROLES_CLAIM].nil?
+      if decoded_token[AtomicLti::Definitions::ROLES_CLAIM].blank?
         errors.push(
           "LTI token is missing required claim #{AtomicLti::Definitions::ROLES_CLAIM}"
         )

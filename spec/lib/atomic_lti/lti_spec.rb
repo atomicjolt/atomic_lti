@@ -92,6 +92,17 @@ module AtomicLti
         end
       end
 
+      it "disallows no provided roles" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = []
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          valid = Lti.validate!(mocks[:decoded_id_token])
+          expect(valid).to eq(true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
       it "disallows only custom roles when role_enforcement_mode is STRICT" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = ["invalid_role"]
@@ -110,17 +121,6 @@ module AtomicLti
             "invalid_role",
             AtomicLti::Definitions::LEARNER_CONTEXT_ROLE,
           ]
-          { decoded_id_token: decoded_id_token }
-        end
-        with_config(role_enforcement_mode: "STRICT") do
-          valid = Lti.validate!(mocks[:decoded_id_token])
-          expect(valid).to eq(true)
-        end
-      end
-
-      it "handles no provided roles" do
-        mocks = setup_canvas_lti_advantage do |decoded_id_token|
-          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = []
           { decoded_id_token: decoded_id_token }
         end
         with_config(role_enforcement_mode: "STRICT") do
