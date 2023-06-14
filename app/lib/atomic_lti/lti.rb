@@ -52,7 +52,7 @@ module AtomicLti
       end
 
       roles = decoded_token[AtomicLti::Definitions::ROLES_CLAIM]
-      if roles.is_a?(Array) && !roles.empty?
+      if roles.is_a?(Array) && !roles.empty? && AtomicLti.role_enforcement_mode == "STRICT"
         invalid_roles = roles - AtomicLti::Definitions::ROLES
         if invalid_roles.length == roles.length
           errors.push("LTI token has invalid roles: #{invalid_roles.join(", ")}")

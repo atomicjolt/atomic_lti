@@ -40,6 +40,12 @@ module AtomicLti
   # option, you will likely have to adjust application code to accommodate
   mattr_accessor :allow_anonymous_user, default: false
 
+  # https://www.imsglobal.org/spec/lti/v1p3#role-vocabularies
+  # Determines how strictly to enforce the role vocabulary. The options are:
+  # - "DEFAULT" which means that unknown roles are allowed to be the only roles in the token.
+  # - "STRICT" which means that unknown roles are not allowed to be the only roles in the token.
+  mattr_accessor :role_enforcement_mode, default: "DEFAULT"
+
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
   end
