@@ -44,7 +44,7 @@ module AtomicLti
   # Determines how strictly to enforce the role vocabulary. The options are:
   # - "DEFAULT" which means that unknown roles are allowed to be the only roles in the token.
   # - "STRICT" which means that unknown roles are not allowed to be the only roles in the token.
-  mattr_accessor :role_enforcement_mode, default: "DEFAULT"
+  mattr_accessor :role_enforcement_mode, default: AtomicLti::RoleEnforcementMode::DEFAULT
 
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
