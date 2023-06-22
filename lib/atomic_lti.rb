@@ -4,6 +4,7 @@ require "atomic_lti/open_id_middleware"
 require "atomic_lti/error_handling_middleware"
 require_relative "../app/lib/atomic_lti/definitions"
 require_relative "../app/lib/atomic_lti/exceptions"
+require_relative "../app/lib/atomic_lti/role_enforcement_mode"
 module AtomicLti
 
   # Set this to true to scope context_id's to the ISS rather than
