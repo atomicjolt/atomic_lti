@@ -6,8 +6,8 @@ module AtomicLti
     describe "validate_token" do
       it "validates the provided token and returns true" do
         mocks = setup_canvas_lti_advantage
-        token = Authorization.validate_token(mocks[:id_token])
-        expect(token.dig("errors", "errors")).to eq({})
+        id_token_decoded = Authorization.validate_token(mocks[:id_token])
+        expect(id_token_decoded["aud"]).to be_present
       end
 
       it "throws an exception when the token is missing the iss value" do

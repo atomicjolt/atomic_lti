@@ -5,10 +5,10 @@ module AtomicLti
 
     AUTHORIZATION_TRIES = 3
     # Validates a token provided by an LTI consumer
-    def self.validate_token(token)
+    def self.validate_token(id_token)
       # Get the iss value from the original request during the oidc call.
       # Use that value to figure out which jwk we should use.
-      decoded_token = JWT.decode(token, nil, false)
+      decoded_token = JWT.decode(id_token, nil, false)
 
       iss = decoded_token.dig(0, "iss")
 
@@ -31,8 +31,8 @@ module AtomicLti
         jwks
       end
 
-      lti_token, _keys = JWT.decode(token, nil, true, { algorithms: ["RS256"], jwks: jwk_loader })
-      lti_token
+      id_token_decoded, _keys = JWT.decode(id_token, nil, true, { algorithms: ["RS256"], jwks: jwk_loader })
+      id_token_decoded
     end
 
     def self.sign_tool_jwt(payload)

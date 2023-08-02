@@ -2,8 +2,8 @@ module AtomicLti
   module Services
     class NamesAndRoles < AtomicLti::Services::Base
 
-      def initialize(lti_token:)
-        super(lti_token: lti_token)
+      def initialize(id_token_decoded:)
+        super(id_token_decoded: id_token_decoded)
       end
 
       def scopes
@@ -11,7 +11,7 @@ module AtomicLti
       end
 
       def endpoint
-        url = @lti_token.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "context_memberships_url")
+        url = @id_token_decoded.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "context_memberships_url")
         raise AtomicLti::Exceptions::NamesAndRolesError, "Unable to access names and roles" unless url.present?
 
         url
@@ -23,15 +23,15 @@ module AtomicLti
         url
       end
 
-      def self.enabled?(lti_token)
-        return false unless lti_token&.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM)
+      def self.enabled?(id_token_decoded)
+        return false unless id_token_decoded&.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM)
 
         (AtomicLti::Definitions::NAMES_AND_ROLES_SERVICE_VERSIONS &
-          (lti_token.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "service_versions") || [])).present?
+          (id_token_decoded.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, "service_versions") || [])).present?
       end
 
       def valid?
-        self.class.enabled?(@lti_token)
+        self.class.enabled?(@id_token_decoded)
       end
 
       # List names and roles

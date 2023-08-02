@@ -78,7 +78,7 @@ def setup_canvas_lti_advantage(
     resource_link_id: resource_link_id,
   )
 
-  @nonce, @state, @csrf_token = AtomicLti::OpenId.generate_state
+  @nonce, @state = AtomicLti::OpenId.generate_state
 
   @decoded_id_token = build_payload(
     client_id: @client_id,
@@ -108,7 +108,7 @@ def setup_canvas_lti_advantage(
   @params = {
     "id_token" => @id_token,
     "state" => @state,
-    "csrf_token" => @csrf_token,
+    "lti_storage_target" => "_parent",
   }
 
   {

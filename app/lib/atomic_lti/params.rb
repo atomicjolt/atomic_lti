@@ -3,8 +3,8 @@ module AtomicLti
   class Params
     attr_reader :token
 
-    def initialize(lti_token)
-      @token = lti_token.with_indifferent_access
+    def initialize(id_token_decoded)
+      @token = id_token_decoded.with_indifferent_access
     end
 
     def lti_advantage?
