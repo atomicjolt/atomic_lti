@@ -184,9 +184,9 @@ module AtomicLti
           "https://test.atomicjolt.xyz/oidc/redirect",
           { method: "POST", params: mocks[:params] },
         )
-        expect {
+        expect do
           subject.call(req_env)
-        }.to raise_error(JWT::DecodeError)
+        end.to raise_error(JWT::DecodeError)
       end
 
       it "returns an error when an incorrect KID is passed in the JWT header" do
@@ -206,9 +206,9 @@ module AtomicLti
           "https://test.atomicjolt.xyz/oidc/redirect",
           { method: "POST", params: mocks[:params] },
         )
-        expect {
+        expect do
           subject.call(req_env)
-        }.to raise_error(JWT::DecodeError)
+        end.to raise_error(JWT::DecodeError)
       end
 
       it "returns an error when the LTI version is invalid" do
@@ -296,7 +296,7 @@ module AtomicLti
       before do
         AtomicLti.use_post_message_storage = true
       end
-    
+
       it "launches" do
         mocks = setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for(
@@ -317,7 +317,7 @@ module AtomicLti
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: mocks[:params] },
         )
-        
+
         req_env["HTTP_COOKIE"] = "open_id_#{@state}=1"
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
@@ -351,9 +351,9 @@ module AtomicLti
           { method: "POST", params: mocks[:params] },
         )
 
-        expect {
+        expect do
           subject.call(req_env)
-        }.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
+        end.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
       end
 
       it "checks the nonce agrees" do
@@ -365,9 +365,9 @@ module AtomicLti
           { method: "POST", params: mocks[:params] },
         )
 
-        expect {
+        expect do
           subject.call(req_env)
-        }.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
+        end.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
       end
 
       it "doesn't launch with invalid token" do
@@ -394,9 +394,9 @@ module AtomicLti
           { method: "POST", params: params },
         )
 
-        expect {
+        expect do
           subject.call(req_env)
-        }.to raise_error(JWT::VerificationError)
+        end.to raise_error(JWT::VerificationError)
       end
     end
   end

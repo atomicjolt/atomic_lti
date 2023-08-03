@@ -3,13 +3,12 @@ module AtomicLti
     class Base
 
       def initialize(id_token_decoded: nil, iss: nil, deployment_id: nil)
-
         token_iss = nil
         token_deployment_id = nil
 
         if id_token_decoded.present?
-          token_iss = id_token_decoded.dig('iss')
-          token_deployment_id = id_token_decoded.dig(AtomicLti::Definitions::DEPLOYMENT_ID)
+          token_iss = id_token_decoded["iss"]
+          token_deployment_id = id_token_decoded[AtomicLti::Definitions::DEPLOYMENT_ID]
         end
 
         @id_token_decoded = id_token_decoded

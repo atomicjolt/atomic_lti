@@ -1,7 +1,7 @@
 module AtomicLti
   # This is the same prefix used in the npm package. There's not a great way to share constants between ruby and npm.
   # Don't change it unless you change it in the Javascript as well.
-  OPEN_ID_COOKIE_PREFIX = "open_id_"
+  OPEN_ID_COOKIE_PREFIX = "open_id_".freeze
 
   class OpenIdMiddleware
     def initialize(app)
@@ -73,8 +73,7 @@ module AtomicLti
       end
     end
 
-    def validate_launch(env, request, validate_target_link_url)
-
+    def validate_launch(request, validate_target_link_url)
       # Validate and decode id_token
       raise AtomicLti::Exceptions::NoLTIToken if request.params["id_token"].blank?
 
@@ -100,8 +99,8 @@ module AtomicLti
       [id_token_decoded, state, state_verified]
     end
 
-    def handle_redirect(env, request)
-      id_token_decoded, _state, _state_verified = validate_launch(env, request, false)
+    def handle_redirect(request)
+      id_token_decoded, _state, _state_verified = validate_launch(request, false)
 
       uri = URI(request.url)
       # Technically the target_link_uri is not required and the certification suite
@@ -126,7 +125,9 @@ module AtomicLti
     end
 
     def matches_redirect?(request)
-      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank?
+      if AtomicLti.oidc_redirect_path.blank?
+        raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured")
+      end
 
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
@@ -151,7 +152,7 @@ module AtomicLti
     end
 
     def handle_lti_launch(env, request)
-      id_token_decoded, state, state_verified = validate_launch(env, request, true)
+      id_token_decoded, state, state_verified = validate_launch(request, true)
 
       id_token = request.params["id_token"]
       update_install(id_token: id_token_decoded)
@@ -167,20 +168,21 @@ module AtomicLti
       env["atomic.validated.decoded_id_token"] = id_token_decoded
       env["atomic.validated.id_token"] = id_token
 
-      #platform = AtomicLti::Platform.find_by!(iss: id_token["iss"])
       platform = AtomicLti::Platform.find_by!(iss: id_token_decoded["iss"])
       if request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
         lti_storage_params = build_lti_storage_params(request, platform)
         # Add the values needed to do client side validate to the environment
-        env["atomic.validated.state_verified"] = state_verified
-        env["atomic.validated.state"] = state
-        env["atomic.validated.lti_storage_params"] = lti_storage_params
+        env["atomic.validated.state_validation"] = {
+          state: state,
+          lti_storage_params: lti_storage_params,
+          verified_by_cookie: state_verified,
+        }
       end
 
       @app.call(env)
     end
 
-    def error!(body = "Error", status = 500, headers = {"Content-Type" => "text/html"})
+    def error!(body = "Error", status = 500, headers = { "Content-Type" => "text/html" })
       [status, headers, [body]]
     end
 
@@ -189,7 +191,7 @@ module AtomicLti
       if init_paths.include?(request.path)
         handle_init(request)
       elsif matches_redirect?(request)
-        handle_redirect(env, request)
+        handle_redirect(request)
       elsif matches_target_link?(request) && request.params["id_token"].present?
         handle_lti_launch(env, request)
       else

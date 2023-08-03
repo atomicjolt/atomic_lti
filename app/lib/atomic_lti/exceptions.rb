@@ -20,7 +20,6 @@ module AtomicLti
     class StateError < AtomicLtiException
     end
 
-
     class OpenIDRedirectError < AtomicLtiException
     end
 
@@ -44,7 +43,6 @@ module AtomicLti
         super(msg)
       end
     end
-
 
     # Authorization errors
     class AtomicLtiAuthException < StandardError
