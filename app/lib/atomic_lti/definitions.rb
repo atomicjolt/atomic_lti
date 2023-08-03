@@ -67,13 +67,13 @@ module AtomicLti
       ]
     end
 
-    CANVAS_PUBLIC_LTI_KEYS_URL = "https://canvas.instructure.com/api/lti/security/jwks".freeze
-    CANVAS_OIDC_URL = "https://canvas.instructure.com/api/lti/authorize_redirect".freeze
-    CANVAS_AUTH_TOKEN_URL = "https://canvas.instructure.com/login/oauth2/token".freeze
+    CANVAS_PUBLIC_LTI_KEYS_URL = "https://sso.canvaslms.com/api/lti/security/jwks".freeze
+    CANVAS_OIDC_URL = "https://sso.canvaslms.com/api/lti/authorize_redirect".freeze
+    CANVAS_AUTH_TOKEN_URL = "https://sso.canvaslms.com/login/oauth2/token".freeze
 
-    CANVAS_BETA_PUBLIC_LTI_KEYS_URL = "https://canvas.beta.instructure.com/api/lti/security/jwks".freeze
-    CANVAS_BETA_AUTH_TOKEN_URL = "https://canvas.beta.instructure.com/login/oauth2/token".freeze
-    CANVAS_BETA_OIDC_URL = "https://canvas.beta.instructure.com/api/lti/authorize_redirect".freeze
+    CANVAS_BETA_PUBLIC_LTI_KEYS_URL = "https://sso.beta.canvaslms.com/api/lti/security/jwks".freeze
+    CANVAS_BETA_AUTH_TOKEN_URL = "https://sso.beta.canvaslms.com/login/oauth2/token".freeze
+    CANVAS_BETA_OIDC_URL = "https://sso.beta.canvaslms.com/login/oauth2/token".freeze
 
     CANVAS_SUBMISSION_TYPE = "https://canvas.instructure.com/lti/submission_type".freeze
 
