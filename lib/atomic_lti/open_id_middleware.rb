@@ -180,6 +180,11 @@ module AtomicLti
       end
 
       @app.call(env)
+
+      # Delete the state cookie
+      status, headers, body = @app.call(env)
+      # Rack::Utils.delete_cookie_header(headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}")
+      [status, headers, body]
     end
 
     def error!(body = "Error", status = 500, headers = { "Content-Type" => "text/html" })

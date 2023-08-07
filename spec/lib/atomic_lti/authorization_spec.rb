@@ -56,7 +56,7 @@ module AtomicLti
         decoded_token, _keys = JWT.decode(signed, jwk.public_key, true, { algorithms: ["RS256"] })
         expect(decoded_token["iss"]).to eq(mocks[:client_id])
         expect(decoded_token["sub"]).to eq(mocks[:client_id])
-        expect(decoded_token["aud"]).to eq("https://canvas.instructure.com/login/oauth2/token")
+        expect(decoded_token["aud"]).to eq(AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL)
       end
 
       it "throws an exception when the deployment can't be found" do

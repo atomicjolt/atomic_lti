@@ -34,9 +34,9 @@ def setup_lti_advantage_db_entries(
 
   # Add some platforms
   AtomicLti::Platform.create_with(
-    jwks_url: "https://canvas.instructure.com/api/lti/security/jwks",
-    token_url: "https://canvas.instructure.com/login/oauth2/token",
-    oidc_url: "https://canvas.instructure.com/api/lti/authorize_redirect"
+    jwks_url: AtomicLti::Definitions::CANVAS_PUBLIC_LTI_KEYS_URL,
+    token_url: AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL,
+    oidc_url: AtomicLti::Definitions::CANVAS_OIDC_URL,
   ).find_or_create_by(iss: "https://canvas.instructure.com")
 
   @iss = iss

@@ -64,7 +64,7 @@ module AtomicLti
           req_env["HTTP_COOKIE"] = "open_id_storage=1"
           status, headers, _response = subject.call(req_env)
           expect(status).to eq(302)
-          expect(headers["Location"]).to start_with "https://canvas.instructure.com/api/lti/authorize_redirect?client_id="
+          expect(headers["Location"]).to start_with "#{AtomicLti::Definitions::CANVAS_OIDC_URL}?client_id="
         end
       end
 
@@ -93,7 +93,7 @@ module AtomicLti
                   {
                     settings: {
                       state: "state",
-                      responseUrl: start_with("https://canvas.instructure.com/api/lti/authorize_redirect"),
+                      responseUrl: start_with(AtomicLti::Definitions::CANVAS_OIDC_URL),
                       ltiStorageParams: nil,
                       relaunchInitUrl: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
                       privacyPolicyUrl: "#",
@@ -131,7 +131,7 @@ module AtomicLti
                         ltiStorageParams: {
                           target: "_parent",
                           originSupportBroken: anything,
-                          platformOIDCUrl: "https://canvas.instructure.com/api/lti/authorize_redirect",
+                          platformOIDCUrl: AtomicLti::Definitions::CANVAS_OIDC_URL,
                         },
                       },
                     ),
@@ -324,7 +324,8 @@ module AtomicLti
         returned_env = response[0]
         expect(returned_env["atomic.validated.id_token"]).to be_present
         expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
-        expect(returned_env["atomic.validated.state_verified"]).to eq(true)
+        expect(returned_env["atomic.validated.state_validation"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(true)
       end
 
       it "launches with state_verified set to false" do
@@ -340,7 +341,8 @@ module AtomicLti
         expect(status).to eq(200)
         expect(returned_env["atomic.validated.id_token"]).to be_present
         expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
-        expect(returned_env["atomic.validated.state_verified"]).to eq(false)
+        expect(returned_env["atomic.validated.state_validation"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(false)
       end
 
       it "doesn't launch with invalid state" do
