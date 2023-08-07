@@ -31,7 +31,7 @@ module AtomicLti
       )
       Rack::Utils.set_cookie_header!(
         headers, "open_id_#{state}",
-        { value: csrf_token, path: "/", max_age: 5.minutes, http_only: false, secure: true, same_site: "None" }
+        { value: csrf_token, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None" }
       )
 
       redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
