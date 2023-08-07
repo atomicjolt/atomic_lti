@@ -51,7 +51,7 @@ module AtomicLti
         expect(headers["Set-Cookie"]).
           to match("open_id_cookie_storage=1; path=/; max-age=31536000; secure; SameSite=None")
         expect(headers["Set-Cookie"]).
-          to match("open_id_state=csrf; path=/; max-age=300; secure; SameSite=None")
+          to match("open_id_state=csrf; path=/; max-age=60; secure; SameSite=None")
       end
 
       context "with cookies" do
