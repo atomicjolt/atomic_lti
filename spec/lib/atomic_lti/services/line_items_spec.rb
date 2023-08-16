@@ -3,17 +3,17 @@ require "rails_helper"
 RSpec.describe AtomicLti::Services::LineItems do
   before do
     setup_canvas_lti_advantage
-    @lti_token = AtomicLti::Authorization.validate_token(@params["id_token"])
-    @line_item = AtomicLti::Services::LineItems.new(lti_token: @lti_token, iss: nil, deployment_id: nil)
+    @id_token_decoded = AtomicLti::Authorization.validate_token(@params["id_token"])
+    @line_item = AtomicLti::Services::LineItems.new(id_token_decoded: @id_token_decoded, iss: nil, deployment_id: nil)
     @id = "https://atomicjolt.instructure.com/api/lti/courses/3334/line_items/31"
     # mock all requests to get a token
     stub_token_create
   end
 
   describe "list" do
-    it "requests all scopres in the token" do
+    it "requests all scopes in the token" do
       expect(AtomicLti::Authorization).to receive(:request_token).
-        with(hash_including({ scopes: match_array(@lti_token[AtomicLti::Definitions::AGS_CLAIM]["scope"]) })).
+        with(hash_including({ scopes: match_array(@id_token_decoded[AtomicLti::Definitions::AGS_CLAIM]["scope"]) })).
         and_return("token")
       stub_line_items_list
       @line_item.list

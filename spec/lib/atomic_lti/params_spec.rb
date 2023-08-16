@@ -1,5 +1,5 @@
 RSpec.describe AtomicLti::Params do
-  let(:lti_token) do
+  let(:lti_token_decoded) do
     {
       iss: "https://canvas.instructure.com",
       aud: "1234",
@@ -7,7 +7,7 @@ RSpec.describe AtomicLti::Params do
       AtomicLti::Definitions::LTI_VERSION => "1.3.0",
     }
   end
-  let(:params) { AtomicLti::Params.new(lti_token) }
+  let(:params) { AtomicLti::Params.new(lti_token_decoded) }
 
   describe "lti_advantage?" do
     it "returns true" do

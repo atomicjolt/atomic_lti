@@ -1,7 +1,7 @@
 module AtomicLti
   module Exceptions
 
-    # General exceptions
+    # LTI data related exceptions
     class AtomicLtiException < StandardError
     end
 
@@ -20,13 +20,7 @@ module AtomicLti
     class StateError < AtomicLtiException
     end
 
-    class OpenIDStateError < AtomicLtiException
-    end
-
     class OpenIDRedirectError < AtomicLtiException
-    end
-
-    class JwtIssueError < AtomicLtiException
     end
 
     class LineItemMissing < LineItemError
@@ -50,16 +44,26 @@ module AtomicLti
       end
     end
 
-    class NoLTIToken < AtomicLtiException
+    # Authorization errors
+    class AtomicLtiAuthException < StandardError
+    end
+
+    class InvalidLTIToken < AtomicLtiAuthException
+      def initialize(msg = "Invalid LTI token provided")
+        super(msg)
+      end
+    end
+
+    class JwtIssueError < AtomicLtiAuthException
+    end
+
+    class NoLTIToken < AtomicLtiAuthException
       def initialize(msg = "No LTI token provided")
         super(msg)
       end
     end
 
-    class InvalidLTIToken < AtomicLtiException
-      def initialize(msg = "Invalid LTI token provided")
-        super(msg)
-      end
+    class OpenIDStateError < AtomicLtiAuthException
     end
 
     # Not found exceptions

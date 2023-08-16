@@ -3,15 +3,15 @@ module AtomicLti
     # Canvas API docs https://canvas.instructure.com/doc/api/line_items.html
     class LineItems < AtomicLti::Services::Base
 
-      def endpoint(lti_token)
-        url = lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "lineitems")
+      def endpoint(id_token_decoded)
+        url = id_token_decoded.dig(AtomicLti::Definitions::AGS_CLAIM, "lineitems")
         raise AtomicLti::Exceptions::LineItemError, "Unable to access line items" unless url.present?
 
         url
       end
 
       def scopes
-        @lti_token&.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")
+        @id_token_decoded&.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")
       end
 
       # Helper method to generate a default set of attributes
@@ -47,14 +47,14 @@ module AtomicLti
         self.class.generate(**attrs)
       end
 
-      def self.can_manage_line_items?(lti_token)
-        lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")&.
+      def self.can_manage_line_items?(id_token_decoded)
+        id_token_decoded.dig(AtomicLti::Definitions::AGS_CLAIM, "scope")&.
           include?(AtomicLti::Definitions::AGS_SCOPE_LINE_ITEM)
       end
 
-      def self.can_query_line_items?(lti_token)
-        can_manage_line_items?(lti_token) ||
-          lti_token.dig(AtomicLti::Definitions::AGS_CLAIM, "scope").
+      def self.can_query_line_items?(id_token_decoded)
+        can_manage_line_items?(id_token_decoded) ||
+          id_token_decoded.dig(AtomicLti::Definitions::AGS_CLAIM, "scope").
             include?(AtomicLti::Definitions::AGS_SCOPE_LINE_ITEM_READONLY)
       end
 
@@ -62,7 +62,7 @@ module AtomicLti
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.index
       def list(query = {})
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitemcontainer+json" }
-        HTTParty.get(endpoint(@lti_token), headers: headers(accept), query: query)
+        HTTParty.get(endpoint(@id_token_decoded), headers: headers(accept), query: query)
       end
 
       # Get a specific line item
@@ -77,7 +77,7 @@ module AtomicLti
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.create
       def create(attrs = nil)
         content_type = { "Content-Type" => "application/vnd.ims.lis.v2.lineitem+json" }
-        HTTParty.post(endpoint(@lti_token), body: JSON.dump(attrs), headers: headers(content_type))
+        HTTParty.post(endpoint(@id_token_decoded), body: JSON.dump(attrs), headers: headers(content_type))
       end
 
       # Update a line item

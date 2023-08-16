@@ -1,4 +1,8 @@
 module AtomicLti
+  # This is the same prefix used in the npm package. There's not a great way to share constants between ruby and npm.
+  # Don't change it unless you change it in the Javascript as well.
+  OPEN_ID_COOKIE_PREFIX = "open_id_".freeze
+
   class OpenIdMiddleware
     def initialize(app)
       @app = app
@@ -22,16 +26,16 @@ module AtomicLti
         raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: request.params["iss"])
       end
 
-      nonce, state, csrf_token = AtomicLti::OpenId.generate_state
+      nonce, state = AtomicLti::OpenId.generate_state
 
       headers = { "Content-Type" => "text/html" }
       Rack::Utils.set_cookie_header!(
-        headers, "open_id_cookie_storage",
+        headers, "#{OPEN_ID_COOKIE_PREFIX}storage",
         { value: "1", path: "/", max_age: 365.days, http_only: false, secure: true, same_site: "None" }
       )
       Rack::Utils.set_cookie_header!(
-        headers, "open_id_#{state}",
-        { value: csrf_token, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None" }
+        headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}",
+        { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None" }
       )
 
       redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
@@ -55,12 +59,12 @@ module AtomicLti
           assigns: {
             settings: {
               state: state,
-              csrf_token: csrf_token,
-              response_url: response_url,
-              lti_storage_params: lti_storage_params,
-              relaunch_init_url: relaunch_init_url(request),
-              privacy_policy_url: AtomicLti.privacy_policy_url,
-              privacy_policy_message: AtomicLti.privacy_policy_message,
+              responseUrl: response_url,
+              ltiStorageParams: lti_storage_params,
+              relaunchInitUrl: relaunch_init_url(request),
+              privacyPolicyUrl: AtomicLti.privacy_policy_url,
+              privacyPolicyMessage: AtomicLti.privacy_policy_message,
+              openIdCookiePrefix: OPEN_ID_COOKIE_PREFIX,
             },
           },
         )
@@ -69,15 +73,34 @@ module AtomicLti
       end
     end
 
-    def handle_redirect(request)
+    def validate_launch(request, validate_target_link_url)
+      # Validate and decode id_token
       raise AtomicLti::Exceptions::NoLTIToken if request.params["id_token"].blank?
 
-      lti_token = AtomicLti::Authorization.validate_token(
-        request.params["id_token"],
-      )
+      id_token_decoded = AtomicLti::Authorization.validate_token(request.params["id_token"])
 
-      AtomicLti::Lti.validate!(lti_token)
-      platform = AtomicLti::Platform.find_by!(iss: lti_token["iss"])
+      raise AtomicLti::Exceptions::InvalidLTIToken.new if id_token_decoded.nil?
+
+      # Validate id token contents
+      AtomicLti::Lti.validate!(id_token_decoded, request.url, validate_target_link_url)
+
+      # Check for the state cookie
+      state_verified = false
+      state = request.params["state"]
+      if request.cookies["open_id_#{state}"]
+        state_verified = true
+      end
+
+      # Validate the state and nonce
+      if !AtomicLti::OpenId.validate_state(id_token_decoded["nonce"], state)
+        raise AtomicLti::Exceptions::OpenIDStateError.new("Invalid OIDC state.")
+      end
+
+      [id_token_decoded, state, state_verified]
+    end
+
+    def handle_redirect(request)
+      id_token_decoded, _state, _state_verified = validate_launch(request, false)
 
       uri = URI(request.url)
       # Technically the target_link_uri is not required and the certification suite
@@ -85,43 +108,26 @@ module AtomicLti
       # but at least for the certification suite we have to have a backup default
       # value that can be set in the configuration of Atomic LTI using
       # the default_deep_link_path
-      target_link_uri = lti_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
+      target_link_uri = id_token_decoded[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
-      redirect_params = {
-        state: request.params["state"],
-        id_token: request.params["id_token"],
-        csrf_token: "",
-      }
-      if request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
-        lti_storage_params = build_lti_storage_params(request, platform)
-      end
       html = ApplicationController.renderer.render(
         :html,
         layout: false,
         template: "atomic_lti/shared/redirect",
         assigns: {
-          launch_params: redirect_params,
+          launch_params: request.params,
           launch_url: target_link_uri,
-          settings: {
-            require_csrf: AtomicLti.enforce_csrf_protection,
-            state: request.params["state"],
-            lti_storage_params: lti_storage_params,
-          },
         },
       )
 
       [200, { "Content-Type" => "text/html" }, [html]]
-    rescue JWT::ExpiredSignature
-      render_error(401, "The launch has expired. Please launch the application again.")
-    rescue JWT::DecodeError
-      render_error(401, "The launch token is invalid.")
-    rescue AtomicLti::Exceptions::NoLTIToken
-      render_error(401, "Invalid launch. Please launch the application again.")
     end
 
     def matches_redirect?(request)
-      raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured") if AtomicLti.oidc_redirect_path.blank?
+      if AtomicLti.oidc_redirect_path.blank?
+        raise AtomicLti::Exceptions::ConfigurationError.new("AtomicLti.oidc_redirect_path is not configured")
+      end
 
       redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
       redirect_path_params = if redirect_uri.query
@@ -146,49 +152,42 @@ module AtomicLti
     end
 
     def handle_lti_launch(env, request)
+      id_token_decoded, state, state_verified = validate_launch(request, true)
+
       id_token = request.params["id_token"]
-      url = request.url
+      update_install(id_token: id_token_decoded)
+      update_platform_instance(id_token: id_token_decoded)
+      update_deployment(id_token: id_token_decoded)
+      update_lti_context(id_token: id_token_decoded)
 
-      payload = valid_token(id_token: id_token, url: url)
-      if !payload
-        Rails.logger.info("Invalid lti launch: id_token: #{payload} - id_token: #{id_token} - url: #{url}")
-        return render_error(401, "Invalid LTI launch. Please launch the application again.")
-      end
-
-      # Validate the state and csrf token
-      state = request.params["state"]
-      csrf_token = request.cookies["open_id_#{state}"] || request.params["csrf_token"]
-      if csrf_token.blank? && AtomicLti.enforce_csrf_protection
-        return render_error(401, "Unauthorized. Please check that your browser allows cookies.")
-      end
-
-      if !AtomicLti::OpenId.validate_state(payload["nonce"], state, csrf_token)
-        return render_error(401, "Invalid launch state")
-      end
-
-      decoded_jwt = payload
-
-      update_install(id_token: decoded_jwt)
-      update_platform_instance(id_token: decoded_jwt)
-      update_deployment(id_token: decoded_jwt)
-      update_lti_context(id_token: decoded_jwt)
-
-      errors = decoded_jwt.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "errors")
+      errors = id_token_decoded.dig(AtomicLti::Definitions::TOOL_PLATFORM_CLAIM, "errors")
       if errors.present? && !errors["errors"].empty?
         Rails.logger.error("Detected errors in lti launch: #{errors}, id_token: #{id_token}")
       end
 
-      env["atomic.validated.decoded_id_token"] = decoded_jwt
+      env["atomic.validated.decoded_id_token"] = id_token_decoded
       env["atomic.validated.id_token"] = id_token
 
+      platform = AtomicLti::Platform.find_by!(iss: id_token_decoded["iss"])
+      if request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
+        lti_storage_params = build_lti_storage_params(request, platform)
+        # Add the values needed to do client side validate to the environment
+        env["atomic.validated.state_validation"] = {
+          state: state,
+          lti_storage_params: lti_storage_params,
+          verified_by_cookie: state_verified,
+        }
+      end
+
       @app.call(env)
-    rescue JWT::ExpiredSignature
-      render_error(401, "The launch has expired. Please launch the application again.")
-    rescue JWT::DecodeError
-      render_error(401, "The launch token is invalid.")
+
+      # Delete the state cookie
+      status, headers, body = @app.call(env)
+      # Rack::Utils.delete_cookie_header(headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}")
+      [status, headers, body]
     end
 
-    def error!(body = "Error", status = 500, headers = {"Content-Type" => "text/html"})
+    def error!(body = "Error", status = 500, headers = { "Content-Type" => "text/html" })
       [status, headers, [body]]
     end
 
@@ -308,23 +307,6 @@ module AtomicLti
         )
     end
 
-    def valid_token(id_token:, url:)
-      token = false
-
-      begin
-        token = AtomicLti::Authorization.validate_token(id_token)
-      rescue JWT::DecodeError => e
-        Rails.logger.error("Unable to decode jwt: #{e}, #{e.backtrace}")
-        return false
-      end
-
-      return false if token.nil?
-
-      AtomicLti::Lti.validate!(token, url, true)
-
-      token
-    end
-
     def relaunch_init_url(request)
       uri = URI.parse(request.url)
       uri.fragment = uri.query = nil
@@ -336,7 +318,7 @@ module AtomicLti
     def build_oidc_response(request, state, nonce, redirect_uri)
       platform = AtomicLti::Platform.find_by(iss: request.params["iss"])
       if !platform
-        raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: request.params["iss"])
+        raise AtomicLti::Exceptions::NoLTIPlatform.new("No platform was found for iss: #{request.params['iss']}")
       end
 
       uri = URI.parse(platform.oidc_url)
@@ -361,8 +343,8 @@ module AtomicLti
     def build_lti_storage_params(request, platform)
       {
         target: request.params["lti_storage_target"],
-        origin_support_broken: !AtomicLti.set_post_message_origin,
-        oidc_url: platform.oidc_url,
+        originSupportBroken: !AtomicLti.set_post_message_origin,
+        platformOIDCUrl: platform.oidc_url,
       }
     end
   end

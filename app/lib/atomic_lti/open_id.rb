@@ -1,37 +1,34 @@
 module AtomicLti
   class OpenId
-    def self.validate_state(nonce, state, csrf_token)
-      if csrf_token.blank? && AtomicLti.enforce_csrf_protection
+    def self.validate_state(nonce, state)
+      if state.blank?
         return false
       end
 
-      if csrf_token.present?
-        csrf = AtomicLti::AuthToken.decode(csrf_token)[0]
-        if state.blank? || csrf["state"] != state || csrf["nonce"] != nonce
-          return false
-        end
-      end
-
-      open_id_state = AtomicLti::OpenIdState.find_by(nonce: nonce)
+      open_id_state = AtomicLti::OpenIdState.find_by(state: state)
       if !open_id_state
         return false
       end
 
       open_id_state.destroy
+
+      # Check that the state hasn't expired
+      if open_id_state.created_at < 10.minutes.ago
+        return false
+      end
+
+      if nonce != open_id_state.nonce
+        return false
+      end
+
       true
-    rescue StandardError => e
-      Rails.logger.info("Error decoding token: #{e} - #{e.backtrace}")
-      false
     end
 
     def self.generate_state
       nonce = SecureRandom.hex(64)
       state = SecureRandom.hex(32)
-
-      AtomicLti::OpenIdState.create!(nonce: nonce)
-      csrf_token = AtomicLti::AuthToken.issue_token({ state: state, nonce: nonce }, 15.minutes.from_now)
-
-      [nonce, state, csrf_token]
+      AtomicLti::OpenIdState.create!(nonce: nonce, state: state)
+      [nonce, state]
     end
   end
 end

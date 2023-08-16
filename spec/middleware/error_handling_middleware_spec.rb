@@ -112,7 +112,7 @@ module AtomicLti
         end
         middleware = ErrorHandlingMiddleware.new(app)
         status, _headers, _response = middleware.call(env)
-        expect(status).to eq(500)
+        expect(status).to eq(401)
       end
 
       it "returns status 500 when an OpenIDRedirectError is thrown" do
@@ -130,7 +130,7 @@ module AtomicLti
         end
         middleware = ErrorHandlingMiddleware.new(app)
         status, _headers, _response = middleware.call(env)
-        expect(status).to eq(500)
+        expect(status).to eq(401)
       end
 
       it "returns status 500 when an LineItemMissing is thrown" do

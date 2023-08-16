@@ -5,8 +5,8 @@ module AtomicLti
 
       attr_accessor :id
 
-      def initialize(lti_token: nil, iss:nil, deployment_id: nil, id: nil)
-        super(lti_token: lti_token, iss: iss, deployment_id: deployment_id)
+      def initialize(id_token_decoded: nil, iss: nil, deployment_id: nil, id: nil)
+        super(id_token_decoded: id_token_decoded, iss: iss, deployment_id: deployment_id)
         @id = id
       end
 
@@ -20,7 +20,7 @@ module AtomicLti
                 "Invalid id or no id provided. Unable to access scores. id should be in the form of a url."
         end
         uri = URI(id)
-        uri.path = uri.path+'/scores'
+        uri.path = "#{uri.path}/scores"
         uri
       end
 

@@ -49,9 +49,9 @@ module AtomicLti
         )
         _status, headers, _response = subject.call(req_env)
         expect(headers["Set-Cookie"]).
-          to match("open_id_cookie_storage=1; path=/; max-age=31536000; secure; SameSite=None")
+          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None")
         expect(headers["Set-Cookie"]).
-          to match("open_id_state=csrf; path=/; max-age=60; secure; SameSite=None")
+          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None")
       end
 
       context "with cookies" do
@@ -61,10 +61,10 @@ module AtomicLti
             "https://test.atomicjolt.xyz/oidc/init",
             { method: "POST", params: { "iss" => "https://canvas.instructure.com" } },
           )
-          req_env["HTTP_COOKIE"] = "open_id_cookie_storage=1"
+          req_env["HTTP_COOKIE"] = "open_id_storage=1"
           status, headers, _response = subject.call(req_env)
           expect(status).to eq(302)
-          expect(headers["Location"]).to start_with "https://canvas.instructure.com/api/lti/authorize_redirect?client_id="
+          expect(headers["Location"]).to start_with "#{AtomicLti::Definitions::CANVAS_OIDC_URL}?client_id="
         end
       end
 
@@ -93,12 +93,12 @@ module AtomicLti
                   {
                     settings: {
                       state: "state",
-                      csrf_token: "csrf",
-                      response_url: start_with("https://canvas.instructure.com/api/lti/authorize_redirect"),
-                      lti_storage_params: nil,
-                      privacy_policy_url: "#",
-                      privacy_policy_message: nil,
-                      relaunch_init_url: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
+                      responseUrl: start_with(AtomicLti::Definitions::CANVAS_OIDC_URL),
+                      ltiStorageParams: nil,
+                      relaunchInitUrl: "https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com",
+                      privacyPolicyUrl: "#",
+                      privacyPolicyMessage: nil,
+                      openIdCookiePrefix: AtomicLti::OPEN_ID_COOKIE_PREFIX,
                     },
                   },
                 ),
@@ -128,10 +128,10 @@ module AtomicLti
                   {
                     settings: hash_including(
                       {
-                        lti_storage_params: {
+                        ltiStorageParams: {
                           target: "_parent",
-                          origin_support_broken: anything,
-                          oidc_url: "https://canvas.instructure.com/api/lti/authorize_redirect",
+                          originSupportBroken: anything,
+                          platformOIDCUrl: AtomicLti::Definitions::CANVAS_OIDC_URL,
                         },
                       },
                     ),
@@ -164,7 +164,7 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('"lti_storage_params":{"target":"_parent"')
+        expect(response[0]).to include('<input type="hidden" name="lti_storage_target" id="lti_storage_target" value="_parent" autocomplete="off" />')
       end
 
       it "returns an error when the KID is missing from the JWT header" do
@@ -184,9 +184,9 @@ module AtomicLti
           "https://test.atomicjolt.xyz/oidc/redirect",
           { method: "POST", params: mocks[:params] },
         )
-        status, _headers, response = subject.call(req_env)
-        expect(status).to eq(401)
-        expect(response[0]).to match("The launch token is invalid.")
+        expect do
+          subject.call(req_env)
+        end.to raise_error(JWT::DecodeError)
       end
 
       it "returns an error when an incorrect KID is passed in the JWT header" do
@@ -206,9 +206,9 @@ module AtomicLti
           "https://test.atomicjolt.xyz/oidc/redirect",
           { method: "POST", params: mocks[:params] },
         )
-        status, _headers, response = subject.call(req_env)
-        expect(status).to eq(401)
-        expect(response[0]).to match("The launch token is invalid.")
+        expect do
+          subject.call(req_env)
+        end.to raise_error(JWT::DecodeError)
       end
 
       it "returns an error when the LTI version is invalid" do
@@ -293,6 +293,10 @@ module AtomicLti
     end
 
     describe "lti_launches" do
+      before do
+        AtomicLti.use_post_message_storage = true
+      end
+
       it "launches" do
         mocks = setup_canvas_lti_advantage
         req_env = Rack::MockRequest.env_for(
@@ -307,24 +311,26 @@ module AtomicLti
         expect(returned_env["atomic.validated.decoded_id_token"]).to eq(mocks[:decoded_id_token])
       end
 
-      it "launches with csrf cookie" do
+      it "launches with state cookie" do
         mocks = setup_canvas_lti_advantage
-        csrf_token = mocks[:params].delete("csrf_token")
         req_env = Rack::MockRequest.env_for(
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: mocks[:params] },
         )
-        status, _headers, _response = subject.call(req_env)
-        expect(status).to eq(401)
 
-        req_env["HTTP_COOKIE"] = "open_id_#{@state}=#{csrf_token}"
-        status, _headers, _response = subject.call(req_env)
+        req_env["HTTP_COOKIE"] = "open_id_#{@state}=1"
+        status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
+        returned_env = response[0]
+        expect(returned_env["atomic.validated.id_token"]).to be_present
+        expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(true)
       end
 
-      it "doesn't launch with missing csrf token" do
+      it "launches with state_verified set to false" do
         mocks = setup_canvas_lti_advantage
-        mocks[:params].delete("csrf_token")
+        mocks[:params].delete("csrfToken")
         req_env = Rack::MockRequest.env_for(
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: mocks[:params] },
@@ -332,10 +338,11 @@ module AtomicLti
         status, _headers, response = subject.call(req_env)
 
         returned_env = response[0]
-        expect(status).to eq(401)
-        expect(returned_env["atomic.validated.id_token"]).to eq(nil)
-        expect(returned_env["atomic.validated.decoded_id_token"]).to eq(nil)
-        expect(response[0]).to match("Unauthorized. Please check that your browser allows cookies.")
+        expect(status).to eq(200)
+        expect(returned_env["atomic.validated.id_token"]).to be_present
+        expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"]).to be_present
+        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(false)
       end
 
       it "doesn't launch with invalid state" do
@@ -345,23 +352,24 @@ module AtomicLti
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: mocks[:params] },
         )
-        status, _headers, response = subject.call(req_env)
-        expect(status).to eq(401)
-        expect(response[0]).to match("Invalid launch state")
+
+        expect do
+          subject.call(req_env)
+        end.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
       end
 
       it "checks the nonce agrees" do
         mocks = setup_canvas_lti_advantage
-        _nonce, state, csrf_token = AtomicLti::OpenId.generate_state
+        _nonce, state = AtomicLti::OpenId.generate_state
         mocks[:params]["state"] = state
-        mocks[:params]["csrf_token"] = csrf_token
         req_env = Rack::MockRequest.env_for(
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: mocks[:params] },
         )
-        status, _headers, response = subject.call(req_env)
-        expect(status).to eq(401)
-        expect(response[0]).to match("Invalid launch state")
+
+        expect do
+          subject.call(req_env)
+        end.to raise_error(AtomicLti::Exceptions::OpenIDStateError)
       end
 
       it "doesn't launch with invalid token" do
@@ -387,13 +395,10 @@ module AtomicLti
           "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
           { method: "POST", params: params },
         )
-        status, _headers, response = subject.call(req_env)
 
-        returned_env = response[0]
-        expect(status).to eq(401)
-        expect(returned_env["atomic.validated.id_token"]).to eq(nil)
-        expect(returned_env["atomic.validated.decoded_id_token"]).to eq(nil)
-        expect(response[0]).to match("Invalid LTI launch")
+        expect do
+          subject.call(req_env)
+        end.to raise_error(JWT::VerificationError)
       end
     end
   end
