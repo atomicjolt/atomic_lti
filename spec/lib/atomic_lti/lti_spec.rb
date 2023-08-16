@@ -1,5 +1,6 @@
 require "rails_helper"
 require "support/lti_advantage_helper"
+require "support/config_helpers"
 
 module AtomicLti
   RSpec.describe AtomicLti::Lti do
@@ -80,6 +81,54 @@ module AtomicLti
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
 
+      it "allows only custom roles when role_enforcement_mode is DEFAULT" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = ["invalid_role"]
+          { decoded_id_token: decoded_id_token }
+        end
+        with_config(role_enforcement_mode: "DEFAULT") do
+          valid = Lti.validate!(mocks[:decoded_id_token])
+          expect(valid).to eq(true)
+        end
+      end
+
+      it "disallows no provided roles" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = []
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          valid = Lti.validate!(mocks[:decoded_id_token])
+          expect(valid).to eq(true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+      end
+
+      it "disallows only custom roles when role_enforcement_mode is STRICT" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = ["invalid_role"]
+          { decoded_id_token: decoded_id_token }
+        end
+        with_config(role_enforcement_mode: "STRICT") do
+          expect {
+            Lti.validate!(mocks[:decoded_id_token])
+          }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
+        end
+      end
+
+      it "handles roles claim with invalid members" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = [
+            "invalid_role",
+            AtomicLti::Definitions::LEARNER_CONTEXT_ROLE,
+          ]
+          { decoded_id_token: decoded_id_token }
+        end
+        with_config(role_enforcement_mode: "STRICT") do
+          valid = Lti.validate!(mocks[:decoded_id_token])
+          expect(valid).to eq(true)
+        end
+      end
+
       it "throws an exception if the User (sub) claim is missing" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token.delete("sub")
@@ -124,7 +173,6 @@ module AtomicLti
           Lti.validate!(mocks[:decoded_id_token])
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
-
 
       it "throws an error when the azp is missing" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|

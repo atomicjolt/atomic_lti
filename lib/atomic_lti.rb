@@ -4,6 +4,7 @@ require "atomic_lti/open_id_middleware"
 require "atomic_lti/error_handling_middleware"
 require_relative "../app/lib/atomic_lti/definitions"
 require_relative "../app/lib/atomic_lti/exceptions"
+require_relative "../app/lib/atomic_lti/role_enforcement_mode"
 module AtomicLti
 
   # Set this to true to scope context_id's to the ISS rather than
@@ -39,6 +40,12 @@ module AtomicLti
   # Canvas, this means the user is not logged in at all. If you enable this
   # option, you will likely have to adjust application code to accommodate
   mattr_accessor :allow_anonymous_user, default: false
+
+  # https://www.imsglobal.org/spec/lti/v1p3#role-vocabularies
+  # Determines how strictly to enforce the role vocabulary. The options are:
+  # - "DEFAULT" which means that unknown roles are allowed to be the only roles in the token.
+  # - "STRICT" which means that unknown roles are not allowed to be the only roles in the token.
+  mattr_accessor :role_enforcement_mode, default: AtomicLti::RoleEnforcementMode::DEFAULT
 
   def self.get_deployments(iss:, deployment_ids:)
     AtomicLti::Deployment.where(iss: iss, deployment_id: deployment_ids)
