@@ -1,3 +1,3 @@
-import { InitOIDCLaunch } from '@atomicjolt/lti-client/lti/init';
+import { InitOIDCLaunch } from '@atomicjolt/lti-client/src/init';
 
 InitOIDCLaunch(window.SETTINGS);

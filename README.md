@@ -41,7 +41,6 @@ with the following contents. Adjust paths as needed.
 Add the middleware configuration to application.rb (assuming AtomicTenant is in use)
   ```
   config.middleware.insert_before AtomicTenant::CurrentApplicationInstanceMiddleware, AtomicLti::OpenIdMiddleware
-  config.middleware.insert_before AtomicLti::OpenIdMiddleware, OidcCompatabilityMiddleware
   config.middleware.insert_before AtomicLti::OpenIdMiddleware, AtomicLti::ErrorHandlingMiddleware
   ```
 
