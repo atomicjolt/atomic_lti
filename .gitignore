@@ -12,3 +12,5 @@
 .byebug_history
 test/dummy/db/*
 /node_modules/
+
+*.gem
