@@ -73,7 +73,7 @@ module AtomicLti
       end
     end
 
-    def validate_launch(request, validate_target_link_url)
+    def validate_launch(request, validate_target_link_url, destroy_state)
       # Validate and decode id_token
       raise AtomicLti::Exceptions::NoLTIToken if request.params["id_token"].blank?
 
@@ -92,7 +92,7 @@ module AtomicLti
       end
 
       # Validate the state and nonce
-      if !AtomicLti::OpenId.validate_state(id_token_decoded["nonce"], state)
+      if !AtomicLti::OpenId.validate_state(id_token_decoded["nonce"], state, destroy_state)
         raise AtomicLti::Exceptions::OpenIDStateError.new("Invalid OIDC state.")
       end
 
@@ -100,7 +100,7 @@ module AtomicLti
     end
 
     def handle_redirect(request)
-      id_token_decoded, _state, _state_verified = validate_launch(request, false)
+      id_token_decoded, _state, _state_verified = validate_launch(request, false, false)
 
       uri = URI(request.url)
       # Technically the target_link_uri is not required and the certification suite
@@ -152,7 +152,7 @@ module AtomicLti
     end
 
     def handle_lti_launch(env, request)
-      id_token_decoded, state, state_verified = validate_launch(request, true)
+      id_token_decoded, state, state_verified = validate_launch(request, true, true)
 
       id_token = request.params["id_token"]
       update_install(id_token: id_token_decoded)
