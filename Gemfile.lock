@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    atomic_lti (1.5.2)
+    atomic_lti (1.5.3)
       pg (~> 1.3)
       rails (~> 7.0)
 

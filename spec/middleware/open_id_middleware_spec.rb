@@ -325,7 +325,7 @@ module AtomicLti
         expect(returned_env["atomic.validated.id_token"]).to be_present
         expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
         expect(returned_env["atomic.validated.state_validation"]).to be_present
-        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(true)
+        expect(returned_env["atomic.validated.state_validation"][:state_verified]).to eq(true)
       end
 
       it "launches with state_verified set to false" do
@@ -342,7 +342,7 @@ module AtomicLti
         expect(returned_env["atomic.validated.id_token"]).to be_present
         expect(returned_env["atomic.validated.decoded_id_token"]).to be_present
         expect(returned_env["atomic.validated.state_validation"]).to be_present
-        expect(returned_env["atomic.validated.state_validation"][:verified_by_cookie]).to eq(false)
+        expect(returned_env["atomic.validated.state_validation"][:state_verified]).to eq(false)
       end
 
       it "doesn't launch with invalid state" do

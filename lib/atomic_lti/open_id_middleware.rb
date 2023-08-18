@@ -175,7 +175,7 @@ module AtomicLti
         env["atomic.validated.state_validation"] = {
           state: state,
           lti_storage_params: lti_storage_params,
-          verified_by_cookie: state_verified,
+          state_verified: state_verified,
         }
       end
 
