@@ -1,6 +1,6 @@
 module AtomicLti
   class OpenId
-    def self.validate_state(nonce, state)
+    def self.validate_state(nonce, state, destroy_state)
       if state.blank?
         return false
       end
@@ -10,7 +10,9 @@ module AtomicLti
         return false
       end
 
-      open_id_state.destroy
+      if destroy_state
+        open_id_state.destroy
+      end
 
       # Check that the state hasn't expired
       if open_id_state.created_at < 10.minutes.ago
