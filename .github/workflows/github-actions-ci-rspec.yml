@@ -43,7 +43,7 @@ jobs:
       - name: Install dependencies
         env:
           RAILS_ENV: test
-          RAILS_GROUPS: build
+          RAILS_GROUPS: development
         run: |
           bundle install
 
