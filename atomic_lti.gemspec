@@ -15,11 +15,11 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  spec.add_dependency "pg", "~> 1.3"
-  spec.add_dependency "rails", "~> 7.0"
-  spec.add_dependency "jwt"
-  spec.add_dependency "json-jwt"
-  spec.add_dependency "httparty"
+  spec.add_runtime_dependency "httparty"
+  spec.add_runtime_dependency "json-jwt"
+  spec.add_runtime_dependency "jwt"
+  spec.add_runtime_dependency "pg", "~> 1.3"
+  spec.add_runtime_dependency "rails", "~> 7.0"
 
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "factory_bot_rails"
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "launchy"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "rspec-rails"
-  
+
   spec.add_development_dependency "brakeman"
   spec.add_development_dependency "pronto"
   spec.add_development_dependency "pronto-rubocop"
