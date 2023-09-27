@@ -9,13 +9,19 @@ on:
 
 jobs:
   brakeman:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['3.2.2']
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install Ruby and gems
         uses: ruby/setup-ruby@v1
         with:
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: Security audit application code
         run: bundle exec brakeman -q -w2
