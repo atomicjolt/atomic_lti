@@ -10,13 +10,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@atomicjolt/lti-client@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-1.1.0.tgz#cc4f229fcaad52a65787463bb1320c6e4dea4f69"
-  integrity sha512-O2PVKleE54JQUzzxhFMrbLRclVEZW+qKAF1uOqdpie348wZGzjLO5MY1/HszSzhgU41KKUEVU6+fYkL11Tyakw==
-  dependencies:
-    i18next "^22.4.15"
-    i18next-browser-languagedetector "^7.0.1"
+"@atomicjolt/lti-client@^2.4.0":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-2.4.1.tgz#edfdf46a6fd151a47eb6957cb2e8e0b7135be397"
+  integrity sha512-q2aj3nDzYkj2FMrDjIGG6Do3/4rVMmQHcHqhdvJKgussOSMBFyXI68kV0npgGY26hM9erhVqpDtIxEQsAANtpw==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.18.6", "@babel/code-frame@^7.21.4":
   version "7.21.4"

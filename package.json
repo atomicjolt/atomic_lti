@@ -1,6 +1,6 @@
 {
   "name": "atomic_lti",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "git@github.com:atomicjolt/atomic_lti.git",
   "author": "Matt Petro <matt.petro@atomicjolt.com>",
@@ -27,7 +27,7 @@
     "jest-environment-jsdom": "^29.5.0"
   },
   "dependencies": {
-    "@atomicjolt/lti-client": "^1.1.0",
+    "@atomicjolt/lti-client": "^2.4.0",
     "i18next": "^22.4.15",
     "i18next-browser-languagedetector": "^7.0.1"
   }
