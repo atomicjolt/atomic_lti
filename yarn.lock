@@ -10,10 +10,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@atomicjolt/lti-client@^2.4.3":
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-2.4.3.tgz#88a3567ae6825b40b9668c3fed4d3cf8b51b16b6"
-  integrity sha512-DlIG84458O/LMOWdTpJ7BfAM5Juna2xg82TJw4oEMPeQxhp9Mkamf3JL5sjh0Y5NkVgCYh4a6iYAUnIPnu5q+A==
+"@atomicjolt/lti-client@^2.4.4":
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-2.4.4.tgz#347cf682937a558d7c765606edfb43ae3dbb3969"
+  integrity sha512-a0aosYO7E86rfqXzNgeiYB+BRtcXLSwplKY77QNLzbo5qSq0HIk7JwHmBDm+ZEr8XL9lRGeVGdZcEnqeJZTJbg==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.22.13":
   version "7.22.13"
