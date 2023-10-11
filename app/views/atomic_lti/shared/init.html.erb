@@ -5,6 +5,9 @@
       .hidden { display: none !important; }
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script type="text/javascript">
+      window.INIT_SETTINGS = <%= @settings.to_json.html_safe %>;
+    </script>
     <%= stylesheet_link_tag "atomic_lti/launch" %>
     <%= javascript_include_tag "atomic_lti/init_app" %>
   </head>
@@ -19,8 +22,5 @@
     </noscript>
     <div id="main-content">
     </div>
-    <script type="text/javascript">
-      InitOIDCLaunch(window.SETTINGS);
-    </script>
   </body>
 </html>

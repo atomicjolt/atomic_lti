@@ -169,14 +169,16 @@ module AtomicLti
       env["atomic.validated.id_token"] = id_token
 
       platform = AtomicLti::Platform.find_by!(iss: id_token_decoded["iss"])
-      if request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
-        lti_storage_params = build_lti_storage_params(request, platform)
-        # Add the values needed to do client side validate to the environment
-        env["atomic.validated.state_validation"] = {
-          state: state,
-          lti_storage_params: lti_storage_params,
-          state_verified: state_verified,
-        }
+
+      # Add the values needed to do client side validate to the environment
+      env["atomic.validated.state_validation"] = {
+        state: state,
+        state_verified: state_verified,
+      }
+
+      if !state_verified && request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
+        env["atomic.validated.state_validation"][:lti_storage_params] =
+          build_lti_storage_params(request, platform)
       end
 
       @app.call(env)
