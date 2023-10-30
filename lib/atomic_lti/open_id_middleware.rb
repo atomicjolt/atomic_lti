@@ -147,7 +147,7 @@ module AtomicLti
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
                              else
-                               []
+                               {}
                              end
 
       matches_redirect_path = request.path == redirect_uri.path
