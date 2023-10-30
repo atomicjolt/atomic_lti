@@ -258,6 +258,19 @@ module AtomicLti
         )
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
+      
+      it "strips url parameters from the launch_params" do
+        AtomicLti.oidc_redirect_path = "/oidc/redirect?redirect=1"
+        mocks = setup_canvas_lti_advantage
+        req_env = Rack::MockRequest.env_for(
+          "https://test.atomicjolt.xyz/oidc/redirect?redirect=1",
+          { method: "POST", params: mocks[:params] },
+        )
+        status, _headers, response = subject.call(req_env)
+        expect(status).to eq(200)
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).not_to match('<input type="hidden" name="redirect"')
+      end
     end
 
     describe "lti deep link launches" do
