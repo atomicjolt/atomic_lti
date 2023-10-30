@@ -111,12 +111,26 @@ module AtomicLti
       target_link_uri = id_token_decoded[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
+      # We want to strip out the redirect path params from the request params
+      # so that we can support having the redirect path be the same as the
+      # launch path, only differentiated by a query parameter. This is needed
+      # because socialize journals redirects straight to /lti_launches and we
+      # have preexisting lti keys that we won't get to migrate and can't break
+      redirect_uri = URI.parse(AtomicLti.oidc_redirect_path)
+      redirect_path_params = if redirect_uri.query
+                               CGI.parse(redirect_uri.query)
+                             else
+                               {}
+                             end
+
+      launch_params = request.params.except(*redirect_path_params.keys)
+
       html = ApplicationController.renderer.render(
         :html,
         layout: false,
         template: "atomic_lti/shared/redirect",
         assigns: {
-          launch_params: request.params,
+          launch_params: launch_params,
           launch_url: target_link_uri,
         },
       )
@@ -133,7 +147,7 @@ module AtomicLti
       redirect_path_params = if redirect_uri.query
                                CGI.parse(redirect_uri.query)
                              else
-                               []
+                               {}
                              end
 
       matches_redirect_path = request.path == redirect_uri.path
