@@ -258,7 +258,7 @@ module AtomicLti
         )
         expect { subject.call(req_env) }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken)
       end
-      
+
       it "strips url parameters from the launch_params" do
         AtomicLti.oidc_redirect_path = "/oidc/redirect?redirect=1"
         mocks = setup_canvas_lti_advantage

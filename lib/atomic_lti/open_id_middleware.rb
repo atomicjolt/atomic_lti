@@ -110,7 +110,7 @@ module AtomicLti
       # the default_deep_link_path
       target_link_uri = id_token_decoded[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
-      
+
       # We want to strip out the redirect path params from the request params
       # so that we can support having the redirect path be the same as the
       # launch path, only differentiated by a query parameter. This is needed
