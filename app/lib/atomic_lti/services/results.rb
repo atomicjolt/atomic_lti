@@ -12,9 +12,8 @@ module AtomicLti
         HTTParty.get(url, headers: headers)
       end
 
-      def show(line_item_id, result_id)
-        url = "#{line_item_id}/results/#{result_id}"
-        HTTParty.get(url, headers: headers)
+      def show(result_id)
+        HTTParty.get(result_id, headers: headers)
       end
 
     end

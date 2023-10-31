@@ -61,6 +61,14 @@ def stub_line_item_delete
     )
 end
 
+def stub_result_show
+  stub_request(:get, %r|https*://[a-zA-Z0-9]+\.[a-zA-Z0-9]+.*com/api/lti/courses/[0-9]+/line_items/[0-9]+/results/[0-9]+|).
+    to_return(
+      status: 200,
+      body: "{\"id\":\"https://atomicjolt.instructure.com/api/lti/courses/3334/line_items/31/results/101\",\"scoreOf\":\"https://atomicjolt.instructure.com/api/lti/courses/3334/line_items/31\",\"userId\":\"6adc5f3a-27dd-4c27-82f0-c013930ccf6a\",\"resultScore\":10.0,\"resultMaximum\":10.0,\"comment\":\"You wrote the thing\"}",
+    )
+end
+
 # Scores
 def stub_scores_create
   stub_request(:post, %r|https*://[a-zA-Z0-9]+\.[a-zA-Z0-9]+.*com/api/lti/courses/[0-9]+/line_items/[0-9]+/scores|).
