@@ -27,6 +27,34 @@ RSpec.describe AtomicLti::Services::LineItems do
     end
   end
 
+  describe "list_all" do
+    it "lists all line items in the course across multiple pages" do
+      stub_line_items_list_all
+      line_items = @line_item.list_all
+      expect(line_items.count).to eq 8
+    end
+
+    it "lists all line items in the course in a single page" do
+      stub_line_items_list
+      line_items = @line_item.list_all
+      expect(line_items.count).to eq 4
+    end
+
+    it "adds a valid query string when a query argument is given" do
+      allow(HTTParty).to receive(:get).and_return(OpenStruct.new({
+        headers: {},
+        body: "[]"
+      }))
+      query = { resource_link_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
+      @line_item.list_all(query)
+
+      expect(HTTParty).to have_received(:get).with(
+        "#{@id_token_decoded.dig(AtomicLti::Definitions::AGS_CLAIM, "lineitems")}?#{query.to_query}",
+        anything,
+      )
+    end
+  end
+
   describe "show" do
     it "gets a specific line item" do
       stub_line_item_show

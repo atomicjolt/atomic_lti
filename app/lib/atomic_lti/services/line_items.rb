@@ -60,9 +60,30 @@ module AtomicLti
 
       # List line items
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.index
-      def list(query = {})
+      def list(query = {}, page_url: nil)
+        url = if page_url.present?
+                page_url
+              else
+                uri = Addressable::URI.parse(endpoint(@id_token_decoded))
+                uri.query_values = (uri.query_values || {}).merge(query)
+                uri.to_str
+              end
+
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitemcontainer+json" }
-        HTTParty.get(endpoint(@id_token_decoded), headers: headers(accept), query: query)
+        HTTParty.get(url, headers: headers(accept), query: query)
+      end
+
+      def list_all(query = {})
+        line_items = []
+        AtomicLti::PagingHelper.paginate_request(list(query)) do |response, next_url|
+          line_items += JSON.parse(response.body)
+
+          if next_url.present?
+            list(query, page_url: next_url)
+          end
+        end
+
+        line_items
       end
 
       # Get a specific line item

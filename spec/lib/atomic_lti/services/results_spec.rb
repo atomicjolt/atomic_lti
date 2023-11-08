@@ -19,10 +19,50 @@ RSpec.describe AtomicLti::Services::Results do
       stub_line_items_list
       @results_service.list(@line_item_id)
     end
+
     it "lists results for the specified line item" do
       stub_line_items_list
       results = JSON.parse(@results_service.list(@line_item_id).body)
       expect(results.empty?).to be false
+    end
+
+    it "adds a valid query string when a query argument is given" do
+      allow(HTTParty).to receive(:get)
+      query = { user_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
+      @results_service.list(@line_item_id, query: query)
+
+      expect(HTTParty).to have_received(:get).with(
+        "#{@line_item_id}/results?#{query.to_query}",
+        anything,
+      )
+    end
+  end
+
+  describe "list_all" do
+    it "lists all results for the specified line item across multiple pages" do
+      stub_result_list_all
+      results = @results_service.list_all(@line_item_id)
+      expect(results.count).to eq 2
+    end
+
+    it "lists all results for the specified line item in a single page" do
+      stub_result_list
+      results = @results_service.list_all(@line_item_id)
+      expect(results.count).to eq 1
+    end
+
+    it "adds a valid query string when a query argument is given" do
+      allow(HTTParty).to receive(:get).and_return(OpenStruct.new({
+        headers: {},
+        body: "[]"
+      }))
+      query = { user_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
+      @results_service.list_all(@line_item_id, query: query)
+
+      expect(HTTParty).to have_received(:get).with(
+        "#{@line_item_id}/results?#{query.to_query}",
+        anything,
+      )
     end
   end
 

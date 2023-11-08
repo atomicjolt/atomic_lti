@@ -93,5 +93,8 @@ module AtomicLti
         super(msg)
       end
     end
+
+    class PaginationLimitExceeded < AtomicLtiException
+    end
   end
 end

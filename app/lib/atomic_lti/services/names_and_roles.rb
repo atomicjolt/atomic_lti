@@ -61,6 +61,21 @@ module AtomicLti
         )
       end
 
+      def list_all(query: {})
+        members = []
+        base_response = list(query: query)
+        AtomicLti::PagingHelper.paginate_request(base_response) do |response, next_url|
+          members += JSON.parse(response.body)["members"]
+          if next_url.present?
+            list(query: query, page_url: next_url)
+          end
+        end
+
+        final_body = JSON.parse(base_response.body)
+        final_body["members"] = members
+        final_body
+      end
+
       def verify_received_user_names(names_and_roles_memberships)
         if names_and_roles_memberships&.body.present?
           members = JSON.parse(names_and_roles_memberships.body)["members"]
