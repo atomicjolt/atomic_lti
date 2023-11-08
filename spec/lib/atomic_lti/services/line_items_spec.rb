@@ -42,7 +42,7 @@ RSpec.describe AtomicLti::Services::LineItems do
 
     it "adds a valid query string when a query argument is given" do
       allow(HTTParty).to receive(:get).and_return(
-        OpenStruct.new({ headers: {}, body: "[]" })
+        OpenStruct.new({ headers: {}, body: "[]" }),
       )
       query = { resource_link_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
       @line_item.list_all(query)
