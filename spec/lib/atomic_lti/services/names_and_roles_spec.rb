@@ -90,16 +90,19 @@ RSpec.describe AtomicLti::Services::NamesAndRoles do
     end
 
     it "adds a valid query string when a query argument is given" do
-      allow(HTTParty).to receive(:get).and_return(OpenStruct.new({
-        headers: {},
-        body: '{"members": []}'
-      }))
+      allow(HTTParty).to receive(:get).and_return(
+        OpenStruct.new({ headers: {}, body: '{"members": []}' })
+      )
       names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(id_token_decoded: @id_token_decoded)
       query = { role: "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" }
       names_and_roles_service.list_all(query: query)
 
+      membership_url = @id_token_decoded.dig(
+        AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM,
+        "context_memberships_url",
+      )
       expect(HTTParty).to have_received(:get).with(
-        "#{@id_token_decoded.dig(AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM, 'context_memberships_url')}?#{query.to_query}",
+        "#{membership_url}?#{query.to_query}",
         anything,
       )
     end

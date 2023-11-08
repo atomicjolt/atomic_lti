@@ -12,18 +12,18 @@ module AtomicLti
     end
 
     def self.link_url(links, rel)
-      matching_link = links.find { |link| link.include?("rel=\"#{rel}\"") }
+      matching_link = links.detect { |link| link.include?("rel=\"#{rel}\"") }
 
       return unless matching_link
 
-      matching_link.split(";")[0].gsub(/[\<\>\s]/, "")
+      matching_link.split(";")[0].gsub(/[<>\s]/, "")
     end
 
-    def self.paginate_request(response, &block)
+    def self.paginate_request(response)
       next_url, = response_link_urls(response, "next")
       response = yield response, next_url
 
-      pages_fetched = 1;
+      pages_fetched = 1
       while next_url
         response = yield response, next_url
         break if response.blank?

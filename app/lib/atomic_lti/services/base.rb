@@ -27,7 +27,7 @@ module AtomicLti
 
       def get_next_url(response)
         next_url, = AtomicLti::PagingHelper.response_link_urls(response, "next")
-        return next_url
+        next_url
       end
 
     end

@@ -41,11 +41,11 @@ describe AtomicLti::PagingHelper do
     end
 
     it "raises if it hits the pagination limit" do
-      expect {
-        AtomicLti::PagingHelper.paginate_request(response) do |response, next_url|
+      expect do
+        AtomicLti::PagingHelper.paginate_request(response) do |_, _|
           response
         end
-      }.to raise_error(AtomicLti::Exceptions::PaginationLimitExceeded)
+      end.to raise_error(AtomicLti::Exceptions::PaginationLimitExceeded)
     end
   end
 end
