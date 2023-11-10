@@ -19,22 +19,18 @@ module AtomicLti
       matching_link.split(";")[0].gsub(/[<>\s]/, "")
     end
 
-    def self.paginate_request(response)
-      next_url, = response_link_urls(response, "next")
-      response = yield response, next_url
+    def self.paginate_request
+      all = []
+      next_link = nil
+      loop do
+        result, next_link = yield(next_link)
+        all << result
 
-      pages_fetched = 1
-      while next_url
-        response = yield response, next_url
-        break if response.blank?
+        break if next_link.blank? || result.blank?
 
-        next_url, = response_link_urls(response, "next")
-
-        pages_fetched += 1
-        if pages_fetched > MAX_PAGES
-          raise AtomicLti::Exceptions::PaginationLimitExceeded
-        end
+        raise AtomicLti::Exceptions::PaginationLimitExceeded if all.count > MAX_PAGES
       end
+      all.compact.flatten
     end
   end
 end

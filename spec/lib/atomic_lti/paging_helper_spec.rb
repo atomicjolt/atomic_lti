@@ -30,11 +30,52 @@ describe AtomicLti::PagingHelper do
   end
 
   describe "paginate_request" do
-    it "yields the response and next_url to the block" do
+    it "yields the next_url to the block" do
       yields = []
-      AtomicLti::PagingHelper.paginate_request(response) do |response, next_url|
-        yields.push([response, next_url])
-        nil
+      AtomicLti::PagingHelper.paginate_request do |next_url|
+        yields.push(next_url)
+        if (yields.length == 1)
+          [
+            [{ foo: "bar" }],
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+          ]
+        else
+          [nil, nil]
+        end
+      end
+
+      expect(yields.count).to eq 2
+    end
+
+    it "stops paginating when the results are empty" do
+      yields = []
+      AtomicLti::PagingHelper.paginate_request do |next_url|
+        yields.push(next_url)
+        if (yields.length == 1)
+          [
+            [{ foo: "bar" }],
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+          ]
+        else
+          [[], "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"]
+        end
+      end
+
+      expect(yields.count).to eq 2
+    end
+
+    it "stops paginating when the next page is empty" do
+      yields = []
+      AtomicLti::PagingHelper.paginate_request do |next_url|
+        yields.push(next_url)
+        if (yields.length == 1)
+          [
+            [{ foo: "bar" }],
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+          ]
+        else
+          [[{ foo: "bar" }], nil]
+        end
       end
 
       expect(yields.count).to eq 2
@@ -42,8 +83,11 @@ describe AtomicLti::PagingHelper do
 
     it "raises if it hits the pagination limit" do
       expect do
-        AtomicLti::PagingHelper.paginate_request(response) do |_, _|
-          response
+        AtomicLti::PagingHelper.paginate_request do |_|
+          [
+            [{ foo: "bar" }],
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+          ]
         end
       end.to raise_error(AtomicLti::Exceptions::PaginationLimitExceeded)
     end

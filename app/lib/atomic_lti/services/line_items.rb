@@ -74,16 +74,10 @@ module AtomicLti
       end
 
       def list_all(query = {})
-        line_items = []
-        AtomicLti::PagingHelper.paginate_request(list(query)) do |response, next_url|
-          line_items += JSON.parse(response.body)
-
-          if next_url.present?
-            list(query, page_url: next_url)
-          end
+        AtomicLti::PagingHelper.paginate_request do |next_link|
+          result_page = list(query, page_url: next_link)
+          [JSON.parse(result_page.body), get_next_url(result_page)]
         end
-
-        line_items
       end
 
       # Get a specific line item
