@@ -49,6 +49,7 @@ module AtomicLti
       def logged_service_call(method, *args)
         Rails.logger.debug("Making service call #{method} #{args}")
         response = HTTParty.send(method, *args)
+        Rails.logger.debug("Got status #{response.code} for service call #{method} #{args}")
 
         if response.body.present? && response.success?
           parsed_body = JSON.parse(response.body)
