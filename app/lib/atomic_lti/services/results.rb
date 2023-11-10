@@ -16,7 +16,8 @@ module AtomicLti
                 uri.to_str
               end
 
-        response, = service_get(url, headers: headers)
+        accept = { "Accept" => "application/vnd.ims.lis.v2.resultcontainer+json" }
+        response, = service_get(url, headers: headers(accept))
         response
       end
 
