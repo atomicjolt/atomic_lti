@@ -49,16 +49,16 @@ module AtomicLti
                 uri.query_values = (uri.query_values || {}).merge(query)
                 uri.to_str
               end
-        verify_received_user_names(
-          HTTParty.get(
-            url,
-            headers: headers(
-              {
-                "Accept" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
-              },
-            ),
+        response, = service_get(
+          url,
+          headers: headers(
+            {
+              "Accept" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
+            },
           ),
         )
+
+        verify_received_user_names(response)
       end
 
       def list_all(query: {})

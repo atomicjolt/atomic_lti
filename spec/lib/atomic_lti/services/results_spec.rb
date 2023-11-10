@@ -27,7 +27,9 @@ RSpec.describe AtomicLti::Services::Results do
     end
 
     it "adds a valid query string when a query argument is given" do
-      allow(HTTParty).to receive(:get)
+      allow(HTTParty).to receive(:get).and_return(
+        OpenStruct.new({ headers: {}, body: "[]" }),
+      )
       query = { user_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
       @results_service.list(@line_item_id, query: query)
 

@@ -16,7 +16,9 @@ module AtomicLti
                 uri.to_str
               end
 
-        HTTParty.get(url, headers: headers)
+        accept = { "Accept" => "application/vnd.ims.lis.v2.resultcontainer+json" }
+        response, = service_get(url, headers: headers(accept))
+        response
       end
 
       def list_all(line_item_id, query: {})
@@ -27,7 +29,8 @@ module AtomicLti
       end
 
       def show(result_id)
-        HTTParty.get(result_id, headers: headers)
+        response, = service_get(result_id, headers: headers)
+        response
       end
 
     end
