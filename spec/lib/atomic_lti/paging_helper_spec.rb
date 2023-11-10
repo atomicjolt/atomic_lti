@@ -34,10 +34,10 @@ describe AtomicLti::PagingHelper do
       yields = []
       AtomicLti::PagingHelper.paginate_request do |next_url|
         yields.push(next_url)
-        if (yields.length == 1)
+        if yields.length == 1
           [
             [{ foo: "bar" }],
-            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB",
           ]
         else
           [nil, nil]
@@ -51,10 +51,10 @@ describe AtomicLti::PagingHelper do
       yields = []
       AtomicLti::PagingHelper.paginate_request do |next_url|
         yields.push(next_url)
-        if (yields.length == 1)
+        if yields.length == 1
           [
             [{ foo: "bar" }],
-            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB",
           ]
         else
           [[], "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"]
@@ -68,10 +68,10 @@ describe AtomicLti::PagingHelper do
       yields = []
       AtomicLti::PagingHelper.paginate_request do |next_url|
         yields.push(next_url)
-        if (yields.length == 1)
+        if yields.length == 1
           [
             [{ foo: "bar" }],
-            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB",
           ]
         else
           [[{ foo: "bar" }], nil]
@@ -86,7 +86,7 @@ describe AtomicLti::PagingHelper do
         AtomicLti::PagingHelper.paginate_request do |_|
           [
             [{ foo: "bar" }],
-            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB"
+            "https://www.example.com/api/v1/courses/:id/discussion_topics.json?opaqueB",
           ]
         end
       end.to raise_error(AtomicLti::Exceptions::PaginationLimitExceeded)
