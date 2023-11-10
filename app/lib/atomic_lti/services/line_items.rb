@@ -70,7 +70,7 @@ module AtomicLti
               end
 
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitemcontainer+json" }
-        response, = service_get(url, headers: headers(accept), query: query)
+        response, = service_get(url, headers: headers(accept))
         response
       end
 
