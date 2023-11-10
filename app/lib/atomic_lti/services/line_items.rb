@@ -70,7 +70,8 @@ module AtomicLti
               end
 
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitemcontainer+json" }
-        HTTParty.get(url, headers: headers(accept), query: query)
+        response, = service_get(url, headers: headers(accept), query: query)
+        response
       end
 
       def list_all(query = {})
@@ -84,7 +85,8 @@ module AtomicLti
       # https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.show
       def show(line_item_url)
         accept = { "Accept" => "application/vnd.ims.lis.v2.lineitem+json" }
-        HTTParty.get(line_item_url, headers: headers(accept))
+        response, = service_get(line_item_url, headers: headers(accept))
+        response
       end
 
       # Create a line item
@@ -92,18 +94,21 @@ module AtomicLti
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.create
       def create(attrs = nil)
         content_type = { "Content-Type" => "application/vnd.ims.lis.v2.lineitem+json" }
-        HTTParty.post(endpoint(@id_token_decoded), body: JSON.dump(attrs), headers: headers(content_type))
+        response, = service_post(endpoint(@id_token_decoded), body: JSON.dump(attrs), headers: headers(content_type))
+        response
       end
 
       # Update a line item
       # Canvas: https://canvas.beta.instructure.com/doc/api/line_items.html#method.lti/ims/line_items.update
       def update(line_item_url, attrs)
         content_type = { "Content-Type" => "application/vnd.ims.lis.v2.lineitem+json" }
-        HTTParty.put(line_item_url, body: JSON.dump(attrs), headers: headers(content_type))
+        response, = service_put(line_item_url, body: JSON.dump(attrs), headers: headers(content_type))
+        response
       end
 
       def delete(line_item_url)
-        HTTParty.delete(line_item_url, headers: headers)
+        response, = service_delete(line_item_url, headers: headers)
+        response
       end
     end
   end

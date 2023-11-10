@@ -49,16 +49,16 @@ module AtomicLti
                 uri.query_values = (uri.query_values || {}).merge(query)
                 uri.to_str
               end
-        verify_received_user_names(
-          HTTParty.get(
-            url,
-            headers: headers(
-              {
-                "Accept" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
-              },
-            ),
+        response, = service_get(
+          url,
+          headers: headers(
+            {
+              "Accept" => "application/vnd.ims.lti-nrps.v2.membershipcontainer+json",
+            },
           ),
         )
+
+        verify_received_user_names(response)
       end
 
       def list_all(query: {})
@@ -67,7 +67,7 @@ module AtomicLti
         members = AtomicLti::PagingHelper.paginate_request do |next_link|
           result_page = list(query: query, page_url: next_link)
           page_body = JSON.parse(result_page.body)
-          [page_body["members"], get_next_url(result_page)]
+          [page_body["members"], get_next_url(result_page), result_page]
         end
 
         page_body["members"] = members
