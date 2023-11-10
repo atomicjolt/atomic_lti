@@ -47,36 +47,34 @@ module AtomicLti
       end
 
       def logged_service_call(method, *args)
-        begin
-          Rails.logger.debug("Making service call #{method} #{args}")
-          response = HTTParty.send(method, *args)
+        Rails.logger.debug("Making service call #{method} #{args}")
+        response = HTTParty.send(method, *args)
 
-          if response.body.present? && response.success?
-            parsed_body = JSON.parse(response.body)
-          end
-
-          if !response.success? && response.code != 404
-            Rails.logger.error("Encountered an error while making service request #{method} #{args}")
-            Rails.logger.error("Got code #{response.code}")
-            Rails.logger.error(response.body)
-          end
-
-          [response, parsed_body]
-        rescue JSON::ParserError => e
-          # We do not reraise this error as previously we did not check at all for valid json. This is purely for
-          # logging purposes.
-          Rails.logger.error("Encountered an error while parsing response for service request #{method} #{args}")
-          Rails.logger.error(response.body)
-          Rails.logger.error(e)
-
-          [response, nil]
-        rescue StandardError => e
-          Rails.logger.error("Encountered an error while making service request #{method} #{args}")
-          Rails.logger.error(response&.body)
-          Rails.logger.error(e)
-
-          raise e
+        if response.body.present? && response.success?
+          parsed_body = JSON.parse(response.body)
         end
+
+        if !response.success? && response.code != 404
+          Rails.logger.error("Encountered an error while making service request #{method} #{args}")
+          Rails.logger.error("Got code #{response.code}")
+          Rails.logger.error(response.body)
+        end
+
+        [response, parsed_body]
+      rescue JSON::ParserError => e
+        # We do not reraise this error as previously we did not check at all for valid json. This is purely for
+        # logging purposes.
+        Rails.logger.error("Encountered an error while parsing response for service request #{method} #{args}")
+        Rails.logger.error(response.body)
+        Rails.logger.error(e)
+
+        [response, nil]
+      rescue StandardError => e
+        Rails.logger.error("Encountered an error while making service request #{method} #{args}")
+        Rails.logger.error(response&.body)
+        Rails.logger.error(e)
+
+        raise e
       end
     end
   end
