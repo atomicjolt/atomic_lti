@@ -30,20 +30,6 @@ module AtomicLti
         next_url
       end
 
-      def validate_service_response(response)
-        begin
-          response = yield
-          JSON.parse(response.body)
-        rescue StandardError => e
-          Rails.logger.error("Encountered an error while parsing service response")
-          Rails.logger.error(response.body)
-          Rails.logger.error(e)
-          raise AtomicLti::ServiceRequestFailed.new(e)
-        end
-
-        response
-      end
-
       def service_get(*args)
         logged_service_call(:get, *args)
       end
