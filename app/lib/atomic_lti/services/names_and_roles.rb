@@ -67,7 +67,7 @@ module AtomicLti
         members = AtomicLti::PagingHelper.paginate_request do |next_link|
           result_page = list(query: query, page_url: next_link)
           page_body = JSON.parse(result_page.body)
-          [page_body["members"], get_next_url(result_page), result_page]
+          [page_body["members"], get_next_url(result_page)]
         end
 
         page_body["members"] = members
