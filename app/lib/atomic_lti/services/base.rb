@@ -26,12 +26,8 @@ module AtomicLti
       end
 
       def get_next_url(response)
-        link = response.headers["link"]
-        return nil if link.blank?
-
-        if url = link.split(",").detect { |l| l.split(";")[1].strip == 'rel="next"' }
-          url.split(";")[0].gsub(/[\<\>\s]/, "")
-        end
+        next_url, = AtomicLti::PagingHelper.response_link_urls(response, "next")
+        next_url
       end
 
     end

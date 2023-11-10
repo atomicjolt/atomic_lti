@@ -73,4 +73,38 @@ RSpec.describe AtomicLti::Services::NamesAndRoles do
       end
     end
   end
+
+  describe "list_all" do
+    it "lists all memberships in the course across multiple pages" do
+      stub_names_and_roles_list_all
+      names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(id_token_decoded: @id_token_decoded)
+      members = names_and_roles_service.list_all["members"]
+      expect(members.count).to eq 10
+    end
+
+    it "lists all memberships in the course in a single page" do
+      stub_names_and_roles_list
+      names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(id_token_decoded: @id_token_decoded)
+      members = names_and_roles_service.list_all["members"]
+      expect(members.count).to eq 5
+    end
+
+    it "adds a valid query string when a query argument is given" do
+      allow(HTTParty).to receive(:get).and_return(
+        OpenStruct.new({ headers: {}, body: '{"members": []}' }),
+      )
+      names_and_roles_service = AtomicLti::Services::NamesAndRoles.new(id_token_decoded: @id_token_decoded)
+      query = { role: "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" }
+      names_and_roles_service.list_all(query: query)
+
+      membership_url = @id_token_decoded.dig(
+        AtomicLti::Definitions::NAMES_AND_ROLES_CLAIM,
+        "context_memberships_url",
+      )
+      expect(HTTParty).to have_received(:get).with(
+        "#{membership_url}?#{query.to_query}",
+        anything,
+      )
+    end
+  end
 end

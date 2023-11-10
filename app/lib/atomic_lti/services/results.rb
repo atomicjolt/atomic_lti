@@ -7,9 +7,23 @@ module AtomicLti
         [AtomicLti::Definitions::AGS_SCOPE_RESULT]
       end
 
-      def list(line_item_id)
-        url = "#{line_item_id}/results"
+      def list(line_item_id, query: {}, page_url: nil)
+        url = if page_url.present?
+                page_url
+              else
+                uri = Addressable::URI.parse("#{line_item_id}/results")
+                uri.query_values = (uri.query_values || {}).merge(query)
+                uri.to_str
+              end
+
         HTTParty.get(url, headers: headers)
+      end
+
+      def list_all(line_item_id, query: {})
+        AtomicLti::PagingHelper.paginate_request do |next_link|
+          result_page = list(line_item_id, query: query, page_url: next_link)
+          [JSON.parse(result_page.body), get_next_url(result_page)]
+        end
       end
 
       def show(result_id)
