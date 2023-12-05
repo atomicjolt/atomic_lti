@@ -190,7 +190,7 @@ module AtomicLti
         state_verified: state_verified,
       }
 
-      if !state_verified && request.params["lti_storage_target"].present? && AtomicLti.use_post_message_storage
+      if !state_verified && AtomicLti.use_post_message_storage
         env["atomic.validated.state_validation"][:lti_storage_params] =
           build_lti_storage_params(request, platform)
       end
