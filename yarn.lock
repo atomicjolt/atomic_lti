@@ -10,10 +10,15 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@atomicjolt/lti-client@^2.4.5":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-2.4.5.tgz#ec0e64796b373aed8c00a10dde2930ac771ad5cf"
-  integrity sha512-GhEdiO2MU6D4Sd3UQbH3Jug4K9lGe8N/DGnT8ryuPl5+T0+PH6Z5ixTV+JVfzR/TPtxhfXeAGB8eBHwKCGrvlw==
+"@atomicjolt/lti-client@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-client/-/lti-client-2.6.0.tgz#04b93e5d87c85a3fe4c834a40a5385d4d9b2e5c3"
+  integrity sha512-AIlUbjqMz84c6LK5vsjpoqDHDwVNxYP5lcAAFTCOlNO/9Nbh4hBzjQOfE70hbW+vpPhYXZVZwtog+948LXZm9w==
+
+"@atomicjolt/lti-types@^1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@atomicjolt/lti-types/-/lti-types-1.1.7.tgz#91145d9eb06c1e58935912fddb48412599bfdf63"
+  integrity sha512-IS8VOClnZ3OY3t2eYuD2wBfiACH10R3PJcK4fkQOXD4bTC2gqh30YCk6FvYpL85OL4gUnvsho6ZCi1oFUDzAvA==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.22.13":
   version "7.22.13"

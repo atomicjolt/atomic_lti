@@ -27,7 +27,8 @@
     "jest-environment-jsdom": "^29.5.0"
   },
   "dependencies": {
-    "@atomicjolt/lti-client": "^2.4.5",
+    "@atomicjolt/lti-client": "^2.6.0",
+    "@atomicjolt/lti-types": "^1.1.7",
     "i18next": "^22.4.15",
     "i18next-browser-languagedetector": "^7.0.1"
   }
