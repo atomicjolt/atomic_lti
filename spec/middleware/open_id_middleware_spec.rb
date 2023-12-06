@@ -141,34 +141,6 @@ module AtomicLti
             ),
           )
         end
-        it "passes lti storage params even if there is no target" do
-          env = Rack::MockRequest.env_for(
-            "https://test.atomicjolt.xyz/oidc/init",
-            { method: "POST",
-              params: { "iss" => "https://canvas.instructure.com" } },
-          )
-          _status, _headers, _response = subject.call(env)
-          expect(renderer).to have_received(:render).with(
-            :html,
-            hash_including(
-              {
-                assigns: hash_including(
-                  {
-                    settings: hash_including(
-                      {
-                        ltiStorageParams: {
-                          target: nil,
-                          originSupportBroken: anything,
-                          platformOIDCUrl: AtomicLti::Definitions::CANVAS_OIDC_URL,
-                        },
-                      },
-                    ),
-                  },
-                ),
-              },
-            ),
-          )
-        end
       end
     end
 
@@ -440,6 +412,48 @@ module AtomicLti
         expect do
           subject.call(req_env)
         end.to raise_error(JWT::VerificationError)
+      end
+
+      it "passes lti storage params" do
+        mocks = setup_canvas_lti_advantage
+        mocks[:params].delete("csrfToken")
+        req_env = Rack::MockRequest.env_for(
+          "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
+          { method: "POST", params: mocks[:params] },
+        )
+        status, _headers, response = subject.call(req_env)
+
+        returned_env = response[0]
+        expect(status).to eq(200)
+        expect(returned_env["atomic.validated.state_validation"][:lti_storage_params]).
+          to eq(
+            {
+              originSupportBroken: true,
+              platformOIDCUrl: "https://sso.canvaslms.com/api/lti/authorize_redirect",
+              target: "_parent",
+            },
+          )
+      end
+
+      it "passes lti storage params even if there is no storage_target parameter" do
+        mocks = setup_canvas_lti_advantage
+        mocks[:params].delete("csrfToken")
+        mocks[:params].delete("lti_storage_target")
+        req_env = Rack::MockRequest.env_for(
+          "http://atomicjolt-test.atomicjolt.xyz/lti_launches",
+          { method: "POST", params: mocks[:params] },
+        )
+        status, _headers, response = subject.call(req_env)
+
+        returned_env = response[0]
+        expect(status).to eq(200)
+        expect(returned_env["atomic.validated.state_validation"][:lti_storage_params]).
+          to eq(
+            {
+              originSupportBroken: true,
+              platformOIDCUrl: "https://sso.canvaslms.com/api/lti/authorize_redirect",
+            },
+          )
       end
     end
   end

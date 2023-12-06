@@ -361,7 +361,7 @@ module AtomicLti
         target: request.params["lti_storage_target"],
         originSupportBroken: !AtomicLti.set_post_message_origin,
         platformOIDCUrl: platform.oidc_url,
-      }
+      }.compact
     end
   end
 end
