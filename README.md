@@ -19,7 +19,9 @@ $ gem install atomic_lti
 ```
 
 Then install the migrations:
+```bash
 ./bin/rails atomic_lti:install:migrations
+```
 
 ## Usage
 Create a new initializer:
