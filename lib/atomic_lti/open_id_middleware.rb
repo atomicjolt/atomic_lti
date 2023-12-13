@@ -38,7 +38,8 @@ module AtomicLti
         { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None", partitioned: true }
       )
 
-      # Ensure our cookies are partitioned.  This can be removed with Rack > 3.0.8
+      # Ensure our cookies are partitioned.  This can be removed once our Rack version
+      # understands the partitioned: argument above.
       headers[Rack::SET_COOKIE] = partition_cookies(headers[Rack::SET_COOKIE])
 
       redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
