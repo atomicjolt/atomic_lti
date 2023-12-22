@@ -11,7 +11,7 @@ module AtomicLti
         url = if page_url.present?
                 page_url
               else
-                uri = Addressable::URI.parse("#{line_item_id}")
+                uri = Addressable::URI.parse(line_item_id)
                 uri.path = "#{uri.path}/results"
                 uri.query_values = (uri.query_values || {}).merge(query)
                 uri.to_str

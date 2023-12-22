@@ -38,7 +38,7 @@ RSpec.describe AtomicLti::Services::Results do
         anything,
       )
     end
-    
+
     it "handles query params in the line item id" do
       allow(HTTParty).to receive(:get).and_return(
         OpenStruct.new({ headers: {}, body: "[]" }),
