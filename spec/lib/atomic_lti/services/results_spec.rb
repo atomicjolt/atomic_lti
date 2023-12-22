@@ -38,6 +38,21 @@ RSpec.describe AtomicLti::Services::Results do
         anything,
       )
     end
+    
+    it "handles query params in the line item id" do
+      allow(HTTParty).to receive(:get).and_return(
+        OpenStruct.new({ headers: {}, body: "[]" }),
+      )
+      query = { user_id: "6adc5f3a-27dd-4c27-82f0-c013930ccf6a" }
+
+      line_item_id = "https://moodle.atomicjoltdevapps.com/mod/lti/services.php/12/lineitems/165/lineitem?type_id=16"
+      @results_service.list(line_item_id, query: query)
+
+      expect(HTTParty).to have_received(:get).with(
+        "https://moodle.atomicjoltdevapps.com/mod/lti/services.php/12/lineitems/165/lineitem/results?type_id=16&#{query.to_query}",
+        anything,
+      )
+    end
   end
 
   describe "list_all" do
