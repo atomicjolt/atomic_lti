@@ -18,6 +18,7 @@ group :development, :test, :linter do
   gem "rubocop-rails"
   gem "rubocop-rspec"
   gem "webmock"
+  gem "ims-lti"
 end
 
 group :test do
