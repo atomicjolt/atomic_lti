@@ -273,6 +273,7 @@ module AtomicLti
       end
 
       it "updates the target uri host" do
+        previous_setting = AtomicLti.update_target_link_host
         AtomicLti.oidc_redirect_path = "/oidc/redirect?redirect=1"
         AtomicLti.update_target_link_host = true
         mocks = setup_canvas_lti_advantage
@@ -283,6 +284,8 @@ module AtomicLti
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
         expect(response[0]).to match('<form action="http://new-test.atomicjolt.xyz/lti_launches" method="POST">')
+      ensure
+        AtomicLti.update_target_link_host = previous_setting
       end
     end
 

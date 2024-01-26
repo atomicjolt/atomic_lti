@@ -231,6 +231,7 @@ module AtomicLti
       end
 
       it "returns true when target link matches up to host" do
+        previous_setting = AtomicLti.update_target_link_host
         AtomicLti.update_target_link_host = true
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] = "https://example.com/launch?token=1"
@@ -241,6 +242,8 @@ module AtomicLti
         expect {
           Lti.validate!(mocks[:decoded_id_token], "https://other.com/otherlaunch?token=1", true)
         }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken, /doesn't match url/)
+      ensure
+        AtomicLti.update_target_link_host = previous_setting
       end
     end
 
