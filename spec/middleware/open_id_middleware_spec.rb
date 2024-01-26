@@ -271,6 +271,19 @@ module AtomicLti
         expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
         expect(response[0]).not_to match('<input type="hidden" name="redirect"')
       end
+
+      it "updates the target uri host" do
+        AtomicLti.oidc_redirect_path = "/oidc/redirect?redirect=1"
+        AtomicLti.update_target_link_host = true
+        mocks = setup_canvas_lti_advantage
+        req_env = Rack::MockRequest.env_for(
+          "https://new-test.atomicjolt.xyz/oidc/redirect?redirect=1",
+          { method: "POST", params: mocks[:params] },
+        )
+        status, _headers, response = subject.call(req_env)
+        expect(status).to eq(200)
+        expect(response[0]).to match('<form action="http://new-test.atomicjolt.xyz/lti_launches" method="POST">')
+      end
     end
 
     describe "lti deep link launches" do

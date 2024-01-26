@@ -115,6 +115,13 @@ module AtomicLti
       target_link_uri = id_token_decoded[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
+      target = URI.parse(target_link_uri)
+
+      # Optionally update the target link host to match the redirect host
+      if AtomicLti.update_target_link_host && target.host != uri.host
+        target.host = uri.host
+      end
+
       # We want to strip out the redirect path params from the request params
       # so that we can support having the redirect path be the same as the
       # launch path, only differentiated by a query parameter. This is needed
@@ -135,7 +142,7 @@ module AtomicLti
         template: "atomic_lti/shared/redirect",
         assigns: {
           launch_params: launch_params,
-          launch_url: target_link_uri,
+          launch_url: target,
         },
       )
 
