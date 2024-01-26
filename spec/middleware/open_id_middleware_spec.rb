@@ -49,9 +49,9 @@ module AtomicLti
         )
         _status, headers, _response = subject.call(req_env)
         expect(headers["Set-Cookie"]).
-          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None; partitioned")
+          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None")
         expect(headers["Set-Cookie"]).
-          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None; partitioned")
+          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None")
       end
 
       context "with cookies" do

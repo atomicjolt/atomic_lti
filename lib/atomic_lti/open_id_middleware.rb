@@ -31,16 +31,12 @@ module AtomicLti
       headers = { "Content-Type" => "text/html" }
       Rack::Utils.set_cookie_header!(
         headers, "#{OPEN_ID_COOKIE_PREFIX}storage",
-        { value: "1", path: "/", max_age: 365.days, http_only: false, secure: true, same_site: "None", partitioned: true }
+        { value: "1", path: "/", max_age: 365.days, http_only: false, secure: true, same_site: "None" }
       )
       Rack::Utils.set_cookie_header!(
         headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}",
-        { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None", partitioned: true }
+        { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None" }
       )
-
-      # Ensure our cookies are partitioned.  This can be removed once our Rack version
-      # understands the partitioned: argument above.
-      headers[Rack::SET_COOKIE] = partition_cookies(headers[Rack::SET_COOKIE])
 
       redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
       response_url = build_oidc_response(request, state, nonce, redirect_uri)
@@ -366,31 +362,6 @@ module AtomicLti
         originSupportBroken: !AtomicLti.set_post_message_origin,
         platformOIDCUrl: platform.oidc_url,
       }.compact
-    end
-
-    def partition_cookies(header)
-      # Some versions of rack add multiple cookies as a newline-separated string, and others
-      # as an array of strings.
-      case header
-      when String
-        header.split("\n").map do |cookie|
-          if !cookie.match? /partitioned/i
-            "#{cookie}; partitioned"
-          else
-            cookie
-          end
-        end.join("\n")
-      when Array
-        header.map do |cookie|
-          if !cookie.match? /partitioned/i
-            "#{cookie}; partitioned"
-          else
-            cookie
-          end
-        end
-      else
-        header
-      end
     end
   end
 end
