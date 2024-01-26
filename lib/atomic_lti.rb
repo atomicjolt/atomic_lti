@@ -32,6 +32,12 @@ module AtomicLti
   # requires this, but Canvas doesn't currently support it.
   mattr_accessor :set_post_message_origin, default: false
 
+  # Set to true to update the target link uri host to match the oidc redirect host.
+  # Enable this when a single LTI install needs to support launches across multiple hosts.
+  # Setting this avoids state validation problems on launch since state cookies and
+  # postMessage storage won't work across different hosts.
+  mattr_accessor :update_target_link_host, default: false
+
   mattr_accessor :privacy_policy_url, default: "#"
   mattr_accessor :privacy_policy_message, default: nil
 

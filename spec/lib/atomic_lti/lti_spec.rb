@@ -204,6 +204,47 @@ module AtomicLti
         valid = Lti.validate!(mocks[:decoded_id_token])
         expect(valid).to eq(true)
       end
+
+      it "returns true when target link is valid" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] = "https://example.com/launch?token=1"
+          { decoded_id_token: decoded_id_token }
+        end
+        valid = Lti.validate!(mocks[:decoded_id_token], "https://example.com/launch?token=1", true)
+        expect(valid).to eq(true)
+      end
+
+      it "throws an error when target link is invalid" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] = "https://example.com/launch?token=1"
+          { decoded_id_token: decoded_id_token }
+        end
+        expect {
+          Lti.validate!(mocks[:decoded_id_token], "https://example.com/launch?token=2", true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken, /doesn't match url/)
+        expect {
+          Lti.validate!(mocks[:decoded_id_token], "https://example.com/newlaunch?token=1", true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken, /doesn't match url/)
+        expect {
+          Lti.validate!(mocks[:decoded_id_token], "https://other.example.com/launch?token=1#frag", true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken, /doesn't match url/)
+      end
+
+      it "returns true when target link matches up to host" do
+        previous_setting = AtomicLti.update_target_link_host
+        AtomicLti.update_target_link_host = true
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] = "https://example.com/launch?token=1"
+          { decoded_id_token: decoded_id_token }
+        end
+        valid = Lti.validate!(mocks[:decoded_id_token], "https://other.com/launch?token=1", true)
+        expect(valid).to eq(true)
+        expect {
+          Lti.validate!(mocks[:decoded_id_token], "https://other.com/otherlaunch?token=1", true)
+        }.to raise_error(AtomicLti::Exceptions::InvalidLTIToken, /doesn't match url/)
+      ensure
+        AtomicLti.update_target_link_host = previous_setting
+      end
     end
 
     describe "client_id" do
