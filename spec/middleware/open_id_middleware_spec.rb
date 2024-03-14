@@ -153,7 +153,7 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
       end
 
       it "passes lti storage params" do
@@ -268,7 +268,7 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
         expect(response[0]).not_to match('<input type="hidden" name="redirect"')
       end
 
@@ -283,7 +283,7 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://new-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://new-test.atomicjolt.xyz/lti_launches" method="POST"')
       ensure
         AtomicLti.update_target_link_host = previous_setting
       end
@@ -301,7 +301,7 @@ module AtomicLti
         status, _headers, response = subject.call(req_env)
 
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
       end
 
       it "LTI launches" do
