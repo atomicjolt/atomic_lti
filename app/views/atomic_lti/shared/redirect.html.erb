@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <%= stylesheet_link_tag "atomic_lti/launch" %>
   </head>
@@ -13,7 +14,7 @@
           </p>
         </div>
       </noscript>
-      <form action="<%= @launch_url -%>" method="POST">
+      <form action="<%= @launch_url -%>" method="POST" accept-charset="UTF-8">
         <% @launch_params.each do |name, value| -%>
           <%= hidden_field_tag(name, value) %>
         <% end -%>
