@@ -25,9 +25,9 @@ module AtomicLti
     DEEP_LINKING_DATA_CLAIM = "https://purl.imsglobal.org/spec/lti-dl/claim/data".freeze
     DEEP_LINKING_TOOL_MSG_CLAIM = "https://purl.imsglobal.org/spec/lti-dl/claim/msg".freeze
     DEEP_LINKING_TOOL_LOG_CLAIM = "https://purl.imsglobal.org/spec/lti-dl/claim/log".freeze
+    DEEP_LINKING_SERVICE_CLAIM = "https://purl.imsglobal.org/spec/lti-dl/claim/deeplinkingservice".freeze
     CONTENT_ITEM_CLAIM = "https://purl.imsglobal.org/spec/lti-dl/claim/content_items".freeze
     NAMES_AND_ROLES_CLAIM = "https://purl.imsglobal.org/spec/lti-nrps/claim/namesroleservice".freeze
-
     NAMES_AND_ROLES_SERVICE_VERSIONS = ["2.0"].freeze
 
     CALIPER_CLAIM = "https://purl.imsglobal.org/spec/lti-ces/claim/caliper-endpoint-service".freeze
@@ -42,6 +42,11 @@ module AtomicLti
     AGS_SCOPE_SCORE = "https://purl.imsglobal.org/spec/lti-ags/scope/score".freeze
     NAMES_AND_ROLES_SCOPE = "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly".freeze
     CALIPER_SCOPE = "https://purl.imsglobal.org/spec/lti-ces/v1p0/scope/send".freeze
+
+    DEEP_LINKING_READ = "https://purl.imsglobal.org/spec/lti-dl/scope/contentitem.read".freeze
+    DEEP_LINKING_UPDATE = "https://purl.imsglobal.org/spec/lti-dl/scope/contentitem.update".freeze
+    DEEP_LINKING_ADD = "https://purl.imsglobal.org/spec/lti-dl/scope/contentitem.add".freeze
+    DEEP_LINKING_DELETE = "https://purl.imsglobal.org/spec/lti-dl/scope/contentitem.delete".freeze
 
     STUDENT_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student".freeze
     INSTRUCTOR_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Instructor".freeze
