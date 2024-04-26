@@ -31,12 +31,16 @@ module AtomicLti
       headers = { "Content-Type" => "text/html" }
       Rack::Utils.set_cookie_header!(
         headers, "#{OPEN_ID_COOKIE_PREFIX}storage",
-        { value: "1", path: "/", max_age: 365.days, http_only: false, secure: true, same_site: "None" }
+        { value: "1", path: "/", max_age: 365.days, http_only: false, secure: true, same_site: "None", partitioned: true }
       )
       Rack::Utils.set_cookie_header!(
         headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}",
-        { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None" }
+        { value: 1, path: "/", max_age: 1.minute, http_only: false, secure: true, same_site: "None", partitioned: true }
       )
+
+      # Ensure our cookies are partitioned.  This can be removed once our Rack version
+      # understands the partitioned: argument above.
+      headers[Rack::SET_COOKIE] = partition_cookies(headers[Rack::SET_COOKIE])
 
       redirect_uri = [request.base_url, AtomicLti.oidc_redirect_path].join
       response_url = build_oidc_response(request, state, nonce, redirect_uri)
@@ -111,6 +115,13 @@ module AtomicLti
       target_link_uri = id_token_decoded[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM] ||
         File.join("#{uri.scheme}://#{uri.host}", AtomicLti.default_deep_link_path)
 
+      target = URI.parse(target_link_uri)
+
+      # Optionally update the target link host to match the redirect host
+      if AtomicLti.update_target_link_host && target.host != uri.host
+        target.host = uri.host
+      end
+
       # We want to strip out the redirect path params from the request params
       # so that we can support having the redirect path be the same as the
       # launch path, only differentiated by a query parameter. This is needed
@@ -131,7 +142,7 @@ module AtomicLti
         template: "atomic_lti/shared/redirect",
         assigns: {
           launch_params: launch_params,
-          launch_url: target_link_uri,
+          launch_url: target,
         },
       )
 
@@ -362,6 +373,31 @@ module AtomicLti
         originSupportBroken: !AtomicLti.set_post_message_origin,
         platformOIDCUrl: platform.oidc_url,
       }.compact
+    end
+
+    def partition_cookies(header)
+      # Some versions of rack add multiple cookies as a newline-separated string, and others
+      # as an array of strings.
+      case header
+      when String
+        header.split("\n").map do |cookie|
+          if !cookie.match? /partitioned/i
+            "#{cookie}; partitioned"
+          else
+            cookie
+          end
+        end.join("\n")
+      when Array
+        header.map do |cookie|
+          if !cookie.match? /partitioned/i
+            "#{cookie}; partitioned"
+          else
+            cookie
+          end
+        end
+      else
+        header
+      end
     end
   end
 end

@@ -49,9 +49,9 @@ module AtomicLti
         )
         _status, headers, _response = subject.call(req_env)
         expect(headers["Set-Cookie"]).
-          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None")
+          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None; partitioned")
         expect(headers["Set-Cookie"]).
-          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None")
+          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None; partitioned")
       end
 
       context "with cookies" do
@@ -153,7 +153,7 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
       end
 
       it "passes lti storage params" do
@@ -268,8 +268,24 @@ module AtomicLti
         )
         status, _headers, response = subject.call(req_env)
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
         expect(response[0]).not_to match('<input type="hidden" name="redirect"')
+      end
+
+      it "updates the target uri host" do
+        previous_setting = AtomicLti.update_target_link_host
+        AtomicLti.oidc_redirect_path = "/oidc/redirect?redirect=1"
+        AtomicLti.update_target_link_host = true
+        mocks = setup_canvas_lti_advantage
+        req_env = Rack::MockRequest.env_for(
+          "https://new-test.atomicjolt.xyz/oidc/redirect?redirect=1",
+          { method: "POST", params: mocks[:params] },
+        )
+        status, _headers, response = subject.call(req_env)
+        expect(status).to eq(200)
+        expect(response[0]).to match('<form action="http://new-test.atomicjolt.xyz/lti_launches" method="POST"')
+      ensure
+        AtomicLti.update_target_link_host = previous_setting
       end
     end
 
@@ -285,7 +301,7 @@ module AtomicLti
         status, _headers, response = subject.call(req_env)
 
         expect(status).to eq(200)
-        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST">')
+        expect(response[0]).to match('<form action="http://atomicjolt-test.atomicjolt.xyz/lti_launches" method="POST"')
       end
 
       it "LTI launches" do

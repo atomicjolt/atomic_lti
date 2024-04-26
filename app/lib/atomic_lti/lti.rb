@@ -83,7 +83,9 @@ module AtomicLti
 
       # Validate that we are at the target_link_uri
       target_link_uri = decoded_token[AtomicLti::Definitions::TARGET_LINK_URI_CLAIM]
-      if validate_target_link_url && target_link_uri != requested_target_link_uri
+
+      if validate_target_link_url &&
+          !matching_uri?(target_link_uri, requested_target_link_uri, ignore_host: AtomicLti.update_target_link_host)
         errors.push(
           "LTI token target link uri '#{target_link_uri}' doesn't match url '#{requested_target_link_uri}'",
         )
@@ -122,6 +124,17 @@ module AtomicLti
       else
         decoded_token["aud"]
       end
+    end
+
+    def self.matching_uri?(target, actual, ignore_host:)
+      t = URI.parse(target)
+      a = URI.parse(actual)
+
+      t.scheme == a.scheme &&
+        t.path == a.path &&
+        t.query == a.query &&
+        t.fragment == a.fragment &&
+        (ignore_host || t.host == a.host)
     end
   end
 end
