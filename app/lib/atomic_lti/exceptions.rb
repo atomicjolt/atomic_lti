@@ -94,6 +94,8 @@ module AtomicLti
       end
     end
 
+    class InvalidOIDCRegistrationEndpoint < AtomicLtiException; end
+
     class PaginationLimitExceeded < AtomicLtiException
     end
   end
