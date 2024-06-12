@@ -64,7 +64,7 @@ module AtomicLti
       payload = {
         iss:  install.client_id,  # A unique identifier for the entity that issued the JWT
         sub: install.client_id, # "client_id" of the OAuth Client
-        aud: platform.token_url, # Authorization server identifier
+        aud: [platform.authorization_server || platform.token_url], # Authorization server identifier
         iat: Time.now.to_i, # Timestamp for when the JWT was created
         exp: Time.now.to_i + 300, # Timestamp for when the JWT should be treated as having expired
         # (after allowing a margin for clock skew)
