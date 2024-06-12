@@ -56,7 +56,19 @@ module AtomicLti
         decoded_token, _keys = JWT.decode(signed, jwk.public_key, true, { algorithms: ["RS256"] })
         expect(decoded_token["iss"]).to eq(mocks[:client_id])
         expect(decoded_token["sub"]).to eq(mocks[:client_id])
-        expect(decoded_token["aud"]).to eq(AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL)
+        expect(decoded_token["aud"]).to eq([AtomicLti::Definitions::CANVAS_AUTH_TOKEN_URL])
+      end
+
+      it "uses the platform's authorization_server as the aud if available" do
+        mocks = setup_canvas_lti_advantage
+        platform = AtomicLti::Platform.find_by(iss: mocks[:iss])
+        platform.update!(authorization_server: "https://example.com")
+        signed = Authorization.client_assertion(iss: mocks[:iss], deployment_id: mocks[:deployment_id])
+        jwk = Jwk.current_jwk
+        decoded_token, _keys = JWT.decode(signed, jwk.public_key, true, { algorithms: ["RS256"] })
+        expect(decoded_token["iss"]).to eq(mocks[:client_id])
+        expect(decoded_token["sub"]).to eq(mocks[:client_id])
+        expect(decoded_token["aud"]).to eq(["https://example.com"])
       end
 
       it "throws an exception when the deployment can't be found" do
