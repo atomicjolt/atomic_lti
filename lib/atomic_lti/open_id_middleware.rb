@@ -206,8 +206,6 @@ module AtomicLti
           build_lti_storage_params(request, platform)
       end
 
-      @app.call(env)
-
       # Delete the state cookie
       status, headers, body = @app.call(env)
       # Rack::Utils.delete_cookie_header(headers, "#{OPEN_ID_COOKIE_PREFIX}#{state}")
