@@ -293,19 +293,25 @@ module AtomicLti
         title = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["title"]
         types = id_token[AtomicLti::Definitions::CONTEXT_CLAIM]["type"]
 
-        AtomicLti::Context.create_with(
-          label: label,
-          title: title,
-          types: types,
-        ).find_or_create_by!(
-          iss: iss,
-          deployment_id: deployment_id,
-          context_id: context_id,
-        ).update!(
-          label: label,
-          title: title,
-          types: types,
-        )
+        begin
+          AtomicLti::Context.create_with(
+            label: label,
+            title: title,
+            types: types,
+          ).find_or_create_by!(
+            iss: iss,
+            deployment_id: deployment_id,
+            context_id: context_id,
+          ).update!(
+            label: label,
+            title: title,
+            types: types,
+          )
+        rescue ActiveRecord::RecordNotUnique
+          # Throw away not unique exceptions, this only happens with concurrent launches
+          # and this is just maintaining the Context record, nothing uses the return
+          # value
+        end
       else
         Rails.logger.info("No context claim recieved: #{id_token}")
       end
