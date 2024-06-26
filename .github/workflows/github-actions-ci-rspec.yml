@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby-version: [2.7]
+        ruby-version: [3.2]
 
     # Service containers to run with `container-job`
     services:
