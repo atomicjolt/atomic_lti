@@ -23,7 +23,8 @@ module AtomicLti
         resource_id: nil,
         tag: nil,
         resource_link_id: nil,
-        external_tool_url: nil
+        external_tool_url: nil,
+        submission_review: nil
       )
         attrs = {
           scoreMaximum: max_score,
@@ -39,6 +40,9 @@ module AtomicLti
             type: "external_tool",
             external_tool_url: external_tool_url,
           }
+        end
+        if submission_review
+          attrs[:submissionReview] = submission_review
         end
         attrs
       end

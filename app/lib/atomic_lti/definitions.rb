@@ -11,6 +11,7 @@ module AtomicLti
     TOOL_PLATFORM_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/tool_platform".freeze
     AGS_CLAIM = "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint".freeze
     BASIC_OUTCOME_CLAIM = "https://purl.imsglobal.org/spec/lti-bo/claim/basicoutcome".freeze
+    FOR_USER_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/for_user".freeze
 
     MENTOR_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/role_scope_mentor".freeze
     ROLES_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/roles".freeze
