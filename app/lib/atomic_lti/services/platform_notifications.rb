@@ -62,14 +62,14 @@ module AtomicLti
         page_body["members"] = members
         page_body
       end
-      
+
       def update(notice_type, handler)
         content_type = { "Content-Type" => "application/json" }
         payload = { notice_type:, handler: }
         response, = service_put(endpoint, body: JSON.dump(payload), headers: headers(content_type))
         response
       end
-      
+
       def self.validate_notification(notification)
         decoded_token = AtomicLti::Authorization.validate_token(notification)
         if decoded_token.blank?
