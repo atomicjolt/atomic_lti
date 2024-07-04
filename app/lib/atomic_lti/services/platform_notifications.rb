@@ -33,34 +33,14 @@ module AtomicLti
         self.class.enabled?(@id_token_decoded)
       end
 
-      # List platform notifications
-      def list(query: {}, page_url: nil)
-        url = if page_url.present?
-                page_url
-              else
-                uri = Addressable::URI.parse(endpoint)
-                uri.query_values = (uri.query_values || {}).merge(query)
-                uri.to_str
-              end
-        response, = service_get(
-          url,
-          headers: headers(),
-        )
+      # Get platform notifications
+      def get(query: {})
+        uri = Addressable::URI.parse(endpoint)
+        uri.query_values = (uri.query_values || {}).merge(query)
+        url = uri.to_str
 
-        response
-      end
-
-      def list_all(query: {})
-        page_body = nil
-
-        members = AtomicLti::PagingHelper.paginate_request do |next_link|
-          result_page = list(query: query, page_url: next_link)
-          page_body = JSON.parse(result_page.body)
-          [page_body["members"], get_next_url(result_page)]
-        end
-
-        page_body["members"] = members
-        page_body
+        response, = service_get(url, headers:)
+        response.parsed_response
       end
 
       def update(notice_type, handler)
