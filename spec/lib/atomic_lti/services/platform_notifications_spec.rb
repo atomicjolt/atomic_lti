@@ -43,7 +43,7 @@ RSpec.describe AtomicLti::Services::PlatformNotifications do
     it "updates the platform notifications" do
       pns_service = AtomicLti::Services::PlatformNotifications.new(id_token_decoded: @id_token_decoded)
       response = pns_service.update("notice_type", "handler")
-      expect(response.parsed_response).to be_present 
+      expect(response.parsed_response).to be_present
     end
   end
 end

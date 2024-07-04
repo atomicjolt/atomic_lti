@@ -1,17 +1,13 @@
 module AtomicLti
   module Services
     class PlatformNotifications < AtomicLti::Services::Base
-      def initialize(id_token_decoded:)
-        super(id_token_decoded: id_token_decoded)
-      end
-
       def scopes
         [AtomicLti::Definitions::PNS_SCOPE_NOTICEHANDLERS]
       end
 
       def endpoint
         url = @id_token_decoded.dig(AtomicLti::Definitions::PLATFORM_NOTIFICATION_SERVICE_CLAIM, "platform_notification_service_url")
-        raise AtomicLti::Exceptions::PlatformNotificationsError, "Unable to access platform notifications" unless url.present?
+        raise AtomicLti::Exceptions::PlatformNotificationsError, "Unable to access platform notifications" if url.blank?
 
         url
       end
@@ -77,17 +73,17 @@ module AtomicLti
 
         if decoded_token[AtomicLti::Definitions::DEPLOYMENT_ID].blank?
           errors.push(
-            "LTI token is missing required field #{AtomicLti::Definitions::DEPLOYMENT_ID}"
+            "LTI token is missing required field #{AtomicLti::Definitions::DEPLOYMENT_ID}",
           )
         end
 
         if decoded_token[AtomicLti::Definitions::NOTICE_TYPE_CLAIM].blank?
           errors.push(
-            "LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_TYPE}"
+            "LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_TYPE}",
           )
         end
 
-        if errors.length > 0
+        if errors.present?
           raise Exceptions::InvalidPlatformNotification.new(errors.join(" "))
         end
 

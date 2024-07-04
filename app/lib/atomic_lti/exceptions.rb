@@ -13,7 +13,7 @@ module AtomicLti
 
     class NamesAndRolesError < AtomicLtiException
     end
-    
+
     class PlatformNotificationsError < AtomicLtiException; end
 
     class ScoreError < AtomicLtiException
@@ -100,7 +100,7 @@ module AtomicLti
 
     class PaginationLimitExceeded < AtomicLtiException
     end
-    
+
     class InvalidPlatformNotification < AtomicLtiException; end
   end
 end
