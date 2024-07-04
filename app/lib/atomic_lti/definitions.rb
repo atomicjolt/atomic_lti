@@ -49,7 +49,7 @@ module AtomicLti
     AGS_SCOPE_SCORE = "https://purl.imsglobal.org/spec/lti-ags/scope/score".freeze
     NAMES_AND_ROLES_SCOPE = "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly".freeze
     CALIPER_SCOPE = "https://purl.imsglobal.org/spec/lti-ces/v1p0/scope/send".freeze
-    PNS_SCOPE_NOTICEHANDLERS = "https://purl.imsglobal.org/spec/lti-pns/scope/noticehandlers"
+    PNS_SCOPE_NOTICEHANDLERS = "https://purl.imsglobal.org/spec/lti/scope/noticehandlers".freeze
 
     STUDENT_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student".freeze
     INSTRUCTOR_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Instructor".freeze
