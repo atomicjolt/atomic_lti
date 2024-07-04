@@ -23,10 +23,10 @@ module AtomicLti
       end
 
       def self.enabled?(id_token_decoded)
-        return false unless id_token_decoded&.dig(PLATFORM_NOTIFICATION_SERVICE_CLAIM)
+        return false unless id_token_decoded&.dig(AtomicLti::Definitions::PLATFORM_NOTIFICATION_SERVICE_CLAIM)
 
-        (PLATFORM_NOTIFICATION_SERVICE_VERSIONS &
-          (id_token_decoded.dig(PLATFORM_NOTIFICATION_SERVICE_CLAIM, "service_versions") || [])).present?
+        (AtomicLti::Definitions::PLATFORM_NOTIFICATION_SERVICE_VERSIONS &
+          (id_token_decoded.dig(AtomicLti::Definitions::PLATFORM_NOTIFICATION_SERVICE_CLAIM, "service_versions") || [])).present?
       end
 
       def valid?
