@@ -46,4 +46,84 @@ RSpec.describe AtomicLti::Services::PlatformNotifications do
       expect(response.parsed_response).to be_present
     end
   end
+
+  describe "validate_notification" do
+    let(:valid_token) do
+      {
+        "iss" => "issuer",
+        "aud" => ["audience"],
+        AtomicLti::Definitions::DEPLOYMENT_ID => "deployment_id",
+        AtomicLti::Definitions::NOTICE_TYPE_CLAIM => "notice_type",
+        AtomicLti::Definitions::LTI_VERSION => "1.3",
+      }
+    end
+
+    before do
+      allow(AtomicLti::Authorization).to receive(:validate_token).and_return(decoded_token)
+    end
+
+    context "with a valid token" do
+      let(:decoded_token) { valid_token }
+
+      it "does not raise an exception" do
+        expect { described_class.validate_notification(decoded_token) }.not_to raise_error
+      end
+    end
+
+    context "with a blank token" do
+      let(:decoded_token) { {} }
+
+      it "raises an InvalidPlatformNotification exception" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification)
+      end
+    end
+
+    context "with missing iss" do
+      let(:decoded_token) { valid_token.except("iss") }
+
+      it "raises an InvalidPlatformNotification exception with a specific error message" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required field iss/)
+      end
+    end
+
+    context "with missing aud" do
+      let(:decoded_token) { valid_token.except("aud") }
+
+      it "raises an InvalidPlatformNotification exception with a specific error message" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required field aud/)
+      end
+    end
+
+    context "with missing deployment_id" do
+      let(:decoded_token) { valid_token.except(AtomicLti::Definitions::DEPLOYMENT_ID) }
+
+      it "raises an InvalidPlatformNotification exception with a specific error message" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required field #{AtomicLti::Definitions::DEPLOYMENT_ID}/)
+      end
+    end
+
+    context "with missing notice type claim" do
+      let(:decoded_token) { valid_token.except(AtomicLti::Definitions::NOTICE_TYPE_CLAIM) }
+
+      it "raises an InvalidPlatformNotification exception with a specific error message" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_TYPE_CLAIM}/)
+      end
+    end
+
+    context "with missing lti version" do
+      let(:decoded_token) { valid_token.except(AtomicLti::Definitions::LTI_VERSION) }
+
+      it "raises a NoLTIVersion exception" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::NoLTIVersion)
+      end
+    end
+
+    context "with aud as an array and invalid azp" do
+      let(:decoded_token) { valid_token.merge("aud" => ["aud1", "aud2"], "azp" => "invalid_azp") }
+
+      it "raises an InvalidPlatformNotification exception with azp error" do
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token azp is not one of the aud's/)
+      end
+    end
+  end
 end
