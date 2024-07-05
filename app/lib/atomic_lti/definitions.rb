@@ -31,6 +31,12 @@ module AtomicLti
 
     NAMES_AND_ROLES_SERVICE_VERSIONS = ["2.0"].freeze
 
+    PLATFORM_NOTIFICATION_SERVICE_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/platformnotificationservice".freeze
+    PLATFORM_NOTIFICATION_SERVICE_VERSIONS = ["1.0".freeze].freeze
+    NOTICE_TYPE_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/notice_type".freeze
+    PLATFORM_NOTIFICATION_CONTEXT_COPY_NOTICE = "LtiContextCopyNotice".freeze
+    PLATFORM_NOTIFICATION_CONTEXT_COPY_ORIGINS_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/origin_contexts".freeze
+
     CALIPER_CLAIM = "https://purl.imsglobal.org/spec/lti-ces/claim/caliper-endpoint-service".freeze
 
     TOOL_LAUNCH_CALIPER_CONTEXT = "http://purl.imsglobal.org/ctx/caliper/v1p1/ToolLaunchProfile-extension".freeze
@@ -43,6 +49,7 @@ module AtomicLti
     AGS_SCOPE_SCORE = "https://purl.imsglobal.org/spec/lti-ags/scope/score".freeze
     NAMES_AND_ROLES_SCOPE = "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly".freeze
     CALIPER_SCOPE = "https://purl.imsglobal.org/spec/lti-ces/v1p0/scope/send".freeze
+    PNS_SCOPE_NOTICEHANDLERS = "https://purl.imsglobal.org/spec/lti/scope/noticehandlers".freeze
 
     STUDENT_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student".freeze
     INSTRUCTOR_SCOPE = "http://purl.imsglobal.org/vocab/lis/v2/institution/person#Instructor".freeze

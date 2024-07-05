@@ -192,6 +192,17 @@ def deep_link_settings_claim
   }
 end
 
+def platform_notification_claim
+  {
+    "https://purl.imsglobal.org/spec/lti/claim/platformnotificationservice": {
+      "platform_notification_service_url": "https://atomicjolt.instructure.com/api/lti/deployments/d8d80f67-4def-46ea-9bed-ddd1151e5e6b/pns",
+      "service_versions": ["1.0"],
+      "scope": ["https://purl.imsglobal.org/spec/lti/scope/noticehandlers"],
+      "notice_types_supported": ["LtiContextCopyNotice"],
+    },
+  }
+end
+
 def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, resource_link_id:, deployment_id:, nonce:)
   exp = 24.hours.from_now
   payload = {
@@ -268,6 +279,7 @@ def build_payload(client_id:, iss:, lti_user_id:, context_id:, message_type:, re
 
   payload.merge!(resource_link_claim(resource_link_id)) if @message_type == "LtiResourceLinkRequest"
   payload.merge!(deep_link_settings_claim) if @message_type == "LtiDeepLinkingRequest"
+  payload.merge!(platform_notification_claim)
 
   payload
 end

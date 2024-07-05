@@ -142,3 +142,19 @@ def stub_scores_create
       body: "{\"resultUrl\":\"https://atomicjolt.instructure.com/api/lti/courses/3334/line_items/31/results/4\"}",
     )
 end
+
+def stub_platform_notifications_get
+  stub_request(:get, %r|https*://[a-zA-Z0-9]+\.[a-zA-Z0-9]+.*com/api/lti/deployments/[0-9a-z-]+/pns|).
+    to_return(
+      status: 200,
+      body: "{\"client_id\":\"c8b93c66-3cd9-4cd7-976f-9e49ad674a0c\",\"deployment_id\":\"d8d80f67-4def-46ea-9bed-ddd1151e5e6b\",\"notice_handlers\":[{\"notice_type\":\"LtiContextCopyNotice\",\"handler\":\"https://atomicjournalsds.atomicjolt.win/lti_platform_notifications\"}]}",
+    )
+end
+
+def stub_platform_notifications_put
+  stub_request(:put, %r|https*://[a-zA-Z0-9]+\.[a-zA-Z0-9]+.*com/api/lti/deployments/[0-9a-z-]+/pns|).
+    to_return(
+      status: 200,
+      body: "{\"client_id\":\"c8b93c66-3cd9-4cd7-976f-9e49ad674a0c\",\"deployment_id\":\"d8d80f67-4def-46ea-9bed-ddd1151e5e6b\",\"notice_handlers\":[{\"notice_type\":\"LtiContextCopyNotice\",\"handler\":\"https://atomicjournalsds.atomicjolt.win/lti_platform_notifications\"}]}",
+    )
+end
