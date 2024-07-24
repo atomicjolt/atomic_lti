@@ -174,6 +174,7 @@ module AtomicLti
 
     OBSERVER_ROLES = [
       MENTOR_INSTITUTION_ROLE,
+      MENTOR_CONTEXT_ROLE,
       # NON_CREDIT_LEARNER,
     ].freeze
 
