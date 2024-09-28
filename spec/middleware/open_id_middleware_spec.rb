@@ -48,10 +48,22 @@ module AtomicLti
           { method: "POST", params: { "iss" => "https://canvas.instructure.com" } },
         )
         _status, headers, _response = subject.call(req_env)
-        expect(headers["Set-Cookie"]).
-          to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None; partitioned")
-        expect(headers["Set-Cookie"]).
-          to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None; partitioned")
+        expect(headers["set-cookie"]).to be_present
+        cookies = headers["set-cookie"]
+        case cookies
+        when Array
+          expect(cookies.map(&:downcase)).to include(
+            "open_id_storage=1; path=/; max-age=31536000; secure; samesite=none; partitioned"
+          )
+          expect(cookies.map(&:downcase)).to include(
+            "open_id_state=1; path=/; max-age=60; secure; samesite=none; partitioned"
+          )
+        else
+          expect(cookies.downcase).
+            to match("open_id_storage=1; path=/; max-age=31536000; secure; SameSite=None; partitioned")
+          expect(cookies.downcase).
+            to match("open_id_state=1; path=/; max-age=60; secure; SameSite=None; partitioned")
+        end
       end
 
       context "with cookies" do

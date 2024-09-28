@@ -1,11 +1,10 @@
 module AtomicLti
   class Install < ApplicationRecord
+    query_constraints :client_id, :iss
     belongs_to :platform, primary_key: :iss, foreign_key: :iss
+    has_many :deployments, query_constraints: [:client_id, :iss]
 
     validates :client_id, presence: true
     validates :iss, presence: true
-    def deployments
-      AtomicLti::Deployment.where("iss = ? AND client_id = ?", iss, client_id)
-    end
   end
 end
