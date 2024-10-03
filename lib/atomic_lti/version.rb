@@ -1,3 +1,3 @@
 module AtomicLti
-  VERSION = "1.10.0".freeze
+  VERSION = "2.0.0".freeze
 end

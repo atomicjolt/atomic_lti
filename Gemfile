@@ -4,8 +4,6 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # Specify your gem"s dependencies in atomic_lti.gemspec.
 gemspec
 
-gem "composite_primary_keys"
-
 group :development do
   gem "sqlite3"
 end
@@ -24,7 +22,7 @@ end
 group :test do
   gem "launchy"
   gem "rspec"
-  gem "rspec-rails"
+  gem "rspec-rails", "~>7.0"
 
   gem "jwt", "~>2.7.0"
   gem "json-jwt"
