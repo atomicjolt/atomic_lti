@@ -5,6 +5,7 @@ require_relative "../test/dummy/config/environment"
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 
+require "ostruct"
 require "rspec/rails"
 require "webmock/rspec"
 require "factories/_common"
