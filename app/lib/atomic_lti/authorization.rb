@@ -62,7 +62,7 @@ module AtomicLti
       raise AtomicLti::Exceptions::NoLTIPlatform.new(iss: iss, deployment_id: deployment_id) if platform.nil?
 
       payload = {
-        iss:  install.client_id,  # A unique identifier for the entity that issued the JWT
+        iss: install.client_id,  # A unique identifier for the entity that issued the JWT
         sub: install.client_id, # "client_id" of the OAuth Client
         aud: [platform.authorization_server || platform.token_url], # Authorization server identifier
         iat: Time.now.to_i, # Timestamp for when the JWT was created
