@@ -33,7 +33,7 @@ module AtomicLti
 
     PLATFORM_NOTIFICATION_SERVICE_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/platformnotificationservice".freeze
     PLATFORM_NOTIFICATION_SERVICE_VERSIONS = ["1.0".freeze].freeze
-    NOTICE_TYPE_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/notice_type".freeze
+    NOTICE_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/notice".freeze
     PLATFORM_NOTIFICATION_CONTEXT_COPY_NOTICE = "LtiContextCopyNotice".freeze
     PLATFORM_NOTIFICATION_CONTEXT_COPY_ORIGINS_CLAIM = "https://purl.imsglobal.org/spec/lti/claim/origin_contexts".freeze
 

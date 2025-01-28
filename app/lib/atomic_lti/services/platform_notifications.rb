@@ -77,9 +77,9 @@ module AtomicLti
           )
         end
 
-        if decoded_token[AtomicLti::Definitions::NOTICE_TYPE_CLAIM].blank?
+        if decoded_token[AtomicLti::Definitions::NOTICE_CLAIM].blank?
           errors.push(
-            "LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_TYPE_CLAIM}",
+            "LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_CLAIM}",
           )
         end
 
