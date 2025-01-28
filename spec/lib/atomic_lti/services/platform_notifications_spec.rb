@@ -53,7 +53,7 @@ RSpec.describe AtomicLti::Services::PlatformNotifications do
         "iss" => "issuer",
         "aud" => ["audience"],
         AtomicLti::Definitions::DEPLOYMENT_ID => "deployment_id",
-        AtomicLti::Definitions::NOTICE_TYPE_CLAIM => "notice_type",
+        AtomicLti::Definitions::NOTICE_CLAIM => "notice_type",
         AtomicLti::Definitions::LTI_VERSION => "1.3",
       }
     end
@@ -103,10 +103,10 @@ RSpec.describe AtomicLti::Services::PlatformNotifications do
     end
 
     context "with missing notice type claim" do
-      let(:decoded_token) { valid_token.except(AtomicLti::Definitions::NOTICE_TYPE_CLAIM) }
+      let(:decoded_token) { valid_token.except(AtomicLti::Definitions::NOTICE_CLAIM) }
 
       it "raises an InvalidPlatformNotification exception with a specific error message" do
-        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_TYPE_CLAIM}/)
+        expect { described_class.validate_notification(decoded_token) }.to raise_error(AtomicLti::Exceptions::InvalidPlatformNotification, /LTI token is missing required claim #{AtomicLti::Definitions::NOTICE_CLAIM}/)
       end
     end
 
