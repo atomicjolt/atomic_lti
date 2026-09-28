@@ -122,6 +122,8 @@ module AtomicLti
     MANAGER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Manager".freeze
     MEMBER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Member".freeze
     OFFICER_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership#Officer".freeze
+    ## Context sub-roles
+    INSTRUCTOR_TEACHING_ASSISTANT_CONTEXT_ROLE = "http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistant".freeze
 
     ROLES = [
       ADMINISTRATOR_SYSTEM_ROLE,
@@ -153,6 +155,7 @@ module AtomicLti
       MANAGER_CONTEXT_ROLE,
       MEMBER_CONTEXT_ROLE,
       OFFICER_CONTEXT_ROLE,
+      INSTRUCTOR_TEACHING_ASSISTANT_CONTEXT_ROLE,
     ].freeze
 
     ADMINISTRATOR_ROLES = [
