@@ -129,6 +129,19 @@ module AtomicLti
         end
       end
 
+      it "allows the Instructor#TeachingAssistant sub-role when role_enforcement_mode is STRICT" do
+        mocks = setup_canvas_lti_advantage do |decoded_id_token|
+          decoded_id_token[AtomicLti::Definitions::ROLES_CLAIM] = [
+            AtomicLti::Definitions::INSTRUCTOR_TEACHING_ASSISTANT_CONTEXT_ROLE,
+          ]
+          { decoded_id_token: decoded_id_token }
+        end
+        with_config(role_enforcement_mode: "STRICT") do
+          valid = Lti.validate!(mocks[:decoded_id_token])
+          expect(valid).to eq(true)
+        end
+      end
+
       it "throws an exception if the User (sub) claim is missing" do
         mocks = setup_canvas_lti_advantage do |decoded_id_token|
           decoded_id_token.delete("sub")
